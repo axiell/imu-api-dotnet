@@ -48,68 +48,106 @@ This documentation uses conventional types wherever possible. Using conventional
 
 The IMu API source code bundle for version 2.0 (or higher) is required to develop an IMu-based application. This bundle contains all the classes that make up the IMu PHP API. IMu API bundles are available from the IMu [releases](https://emu.kesoftware.com/support/downloads/imu/releases) page.
 
-To build PHP web-based applications (the most common use of the IMu PHP API), the source code bundle must be extracted on the web server machine and be accessible by the web server.
+As with all .Net assemblies, the IMu .Net assembly must be available so that the .Net compiler and runtime environment can find and use the IMu classes. Tools for .Net development, such as Microsoft’s Visual Studio, make it possible to add a reference to the IMu assembly to a project. All classes in the IMu .Net API are included in the one namespace, IMu. As is usual in .Net development, it is possible to refer to an IMu class in your code by either:
 
-In order to use the IMu PHP API, include `IMu.php` in the PHP code. For example, if the IMu API source code is installed in the directory `/usr/local/lib/imu` the following line would be added to the PHP code:
+1. Using the fully qualified name:
 
-```
-<?php
-    require '/usr/local/lib/imu/IMu.php;
-?>
-```
+    C#
+    ```
+    IMu.Session session = new IMu.Session();
+    ```
 
-The `IMu.php` file defines the `IMu` class. This class includes static members which contain information about the IMu installation. The class includes:
+    VB
+    ```
+    Dim session = New IMu.Session()
+    ```
 
-* `IMu::$lib` - the path to the IMu PHP API files.
-* `IMu::VERSION` - the version of this IMu release.
+1. Importing the namespace:
 
-The `$lib` member should also be used to simplify the requiring of other IMu library files, for example:
+    C#
+    ```
+    using IMu;
+    // ⋯
+    Session session = new Session();
+    ```
 
-```
-<?php
-    require_once IMu::$lib . '/Session.php';
-?>
-```
+    VB
+    ```
+    Imports IMu
+    ' ⋯
+    Dim session = New Session()
+    ```
 
 ## 1.1) Test Program
 
-Building this very simple IMu-based web page is a good test of whether the development environment has been set up properly for using IMu:
+Compiling and running this very simple console-based IMu program is a good test of whether the development environment has been set up properly for using IMu:
 
+C#
 ```
-<?php
-    require_once '/usr/local/lib/imu/IMu.php';
+using System;
+using IMu;
 
-    printf('IMu version %s', IMu::VERSION);
-    exit(0);
-?>
+class Hello
+{
+    static void Main(string[] args)
+    {
+        Console.WriteLine("IMu Version {0}", IMu.IMu.VERSION);
+        Environment.Exit(0);
+    }
+}
 ```
+
+VB
+```
+Imports IMu
+
+Module Hello
+    Sub Main()
+        Console.WriteLine("IMu Version {0}", IMu.IMu.VERSION)
+        Environment.Exit(0)
+    End Sub
+End Module
+```
+
+The IMu library includes a class called `IMu`. This class includes the static `string` member `VERSION` which contains the version of this IMu release.
+
 
 ## 1.2) Exceptions
 
-Many of the methods in the IMu library objects throw an exception when an error occurs. For this reason, code that uses IMu library objects should be surrounded with an `try` block.
+Many of the methods in the IMu library objects throw an exception when an error occurs. For this reason, code that uses IMu library objects should be surrounded with an `try/catch` block.
 
 The following code is a basic template for writing PHP programs that use the IMu library:
 
+C#
 ```
-<?php
-    require_once '/usr/local/lib/imu/IMu.php';
+using IMu;
+// ⋯
+try
+{
+    // Create and use IMu objects
     // ⋯
-    try
-    {
-        /* Create and use IMu objects
-        * ⋯
-        */
-    }
-    catch (Exception $e)
-    {
-        /* Handle or report error
-        * ⋯
-        */
-    }
-?>
+}
+catch (Exception e)
+{
+    // Handle or report error
+    // ⋯
+}
 ```
 
-Most IMu exceptions throw an `IMuException` object. The `IMuException` class is a subclass of the standard PHP Exception. In many cases your code can simply catch the standard Exception (as in this template). If more information is required about the exact `IMuException` thrown, see [Exceptions](#7\)-exceptions).
+VB
+```
+Imports IMu
+' ⋯
+Try
+    ' Create and use IMu objects
+    ' ⋯
+Catch ex As Exception
+    ' Handle or report error
+    ' ⋯
+End Try
+```
+
+Most IMu exceptions throw an `IMuException` object. The `IMuException` class is a subclass of the standard .Net `Exception`. In many cases your code can simply catch the standard `Exception` (as in this template). If more information is required about the exact `IMuException` thrown, see [Exceptions](#7\)-exceptions).
 
 > **NOTE:**
 >
@@ -117,40 +155,68 @@ Most IMu exceptions throw an `IMuException` object. The `IMuException` class is 
 
 # 2) Connecting to an IMu Server
 
-Most IMu based programs begin by creating a connection to an IMu server. Connections to a server are created and managed using IMu’s `IMuSession` class. Before connecting, both the name of the host and the port number to connect on must be specified. This can be done in one of three ways.
+Most IMu based programs begin by creating a connection to an IMu server. Connections to a server are created and managed using IMu’s `Session` class. Before connecting, both the name of the host and the port number to connect on must be specified. This can be done in one of three ways.
 
-1. The simplest way to create a connection to an IMu server is to pass the host name and port number to the `IMuSession` constructor and then call the `connect` method. For example:
+1. The simplest way to create a connection to an IMu server is to pass the host name and port number to the `Session` constructor and then call the `Connect` method. For example:
 
+    C#
     ```
-    require_once '/usr/local/lib/imu/IMu.php';
-    require_once IMu::$lib . '/Session.php';
+    using IMu;
     // ⋯
-    $session = new IMuSession('server.com', 12345);
-    $session->connect();
+    Session session = new Session("server.com", 12345);
+    session.Connect();
     ```
 
-1. Alternatively, pass no values to the constructor and then set the `host` and `port` properties (using the `setHost` and `setPort` methods) before calling `connect`:
-
+    VB
     ```
-    require_once '/usr/local/lib/imu/IMu.php';
-    require_once IMu::$lib . '/Session.php';
+    Imports IMu
+    ' ⋯
+    Dim session = New Session("server.com", 12345)
+    session.Connect()
+    ```
+
+1. Alternatively, pass no values to the constructor and then set the `Host` and `Port` properties before calling `Connect`:
+
+    C#
+    ```
+    using IMu;
     // ⋯
-    $session = new IMuSession();
-    $session->setHost("server.com");
-    $session->setPort(12345);
-    $session->connect();
+    Session session = new Session();
+    session.Host = "server.com";
+    session.Port = 12345;
+    session.Connect();
     ```
 
-1. If either the host or port is not set, the `IMuSession` class default value will be used. These defaults can be overridden by setting the (static) class properties `defaultHost` and `defaultPort`:
-
+    VB
     ```
-    require_once '/usr/local/lib/imu/IMu.php';
-    require_once IMu::$lib . '/Session.php';
+    Imports IMu
+    ' ⋯
+    Dim session as Session = New Session
+    session.Host = "server.com"
+    session.Port = 12345
+    session.Connect()
+    ```
+
+1. If either the host or port is not set, the `Session` class default value will be used. These defaults can be overridden by setting the (static) class properties `DefaultHost` and `DefaultPort`:
+
+    C#
+    ```
+    using IMu;
     // ⋯
-    IMuSession::setDefaultHost('server.com');
-    IMuSession::setDefaultPort(12345);
-    $session = new IMuSession();
-    $session->connect();
+    Session.DefaultHost = "server.com";
+    Session.DefaultPort = 12345;
+    Session session = new Session();
+    session.Connect();
+    ```
+
+    VB
+    ```
+    Imports IMu
+    ' ⋯
+    Session.DefaultHost = "server.com"
+    Session.DefaultPort = 12345
+    Dim session = New Session
+    session.Connect()
     ```
 
     This technique is useful when planning to create several connections to the same server or when wanting to get a [Handler](#2.1\)-handlers) object to create the connection automatically.
@@ -163,7 +229,7 @@ Once a connection to an IMu server has been established, it is possible to creat
 >
 > When a handler object is created, a corresponding object is created by the IMu server to service the handler’s requests.
 
-All handlers are subclasses of IMu’s `IMuHandler` class.
+All handlers are subclasses of IMu’s `Handler` class.
 
 > **NOTE:**
 >
@@ -177,17 +243,27 @@ The IMu API provides facilities to search, sort and retrieve information from re
 
 ## 3.1) Searching a Module
 
-A program accesses an EMu module (or table, the terms are used interchangeably) using the `IMuModule` class. The name of the table to be accessed is passed to the `IMuModule` constructor. For example:
+A program accesses an EMu module (or table, the terms are used interchangeably) using the `Module` class. The name of the table to be accessed is passed to the `Module` constructor. For example:
 
+C#
 ```
-require_once IMu::$lib . '/Module.php';
+using IMu;
 // ⋯
-$parties = new IMuModule('eparties', $session);
+Module parties = new Module("eparties", session);
 ```
 
-This code assumes that a `IMuSession` object called session has already been created. If a IMuSession object is not passed to the `IMuModule` constructor, a session will be created automatically using the `defaultHost` and `defaultPort` class properties. See [Connecting to an IMu server](#2\)-connecting-to-an-imu-server) for details.
+VB
+```
+Dim parties = New IMu.Module("eparties", session)
+```
 
-Once a `IMuModule` object has been created, it can be used to search the specified module and retrieve records.
+> **Note:**
+>
+> The IMu class name `Module` conflicts with a Visual Basic reserved word and it is therefore necessary to use the fully qualified name `IMu.Module`.
+
+This code assumes that a `Session` object called *session* has already been created. If a IMuSession object is not passed to the `Module` constructor, a session will be created automatically using the `DefaultHost` and `DefaultPort` class properties. See [Connecting to an IMu server](#2\)-connecting-to-an-imu-server) for details.
+
+Once a `Module` object has been created, it can be used to search the specified module and retrieve records.
 
 Any one of the following methods can be used to search for records within a module:
 
@@ -196,55 +272,107 @@ Any one of the following methods can be used to search for records within a modu
 * [findTerms](#3.1.3\)-the-findterms-method)
 * [findWhere](#3.1.4\)-the-findwhere-method)
 
-### 3.1.1) The findKey Method
+### 3.1.1) The FindKey Method
 
-The `findKey` method searches for a single record by its key.
+The `FindKey` method searches for a single record by its key. The key is a long integer (i.e. `long` in C#, `Long` in VB).
 
 For example, the following code searches for a record with a key of 42 in the Parties module:
 
+C#
 ```
-require_once IMu::$lib . '/Module.php';
+using IMu;
 // ⋯
-$parties = new IMuModule('eparties', $session);
-$hits = $parties->findKey(42);
+Module parties = new Module("eparties", session);
+long hits = parties.FindKey(42);
 ```
 
-The method returns the number of matches found, which is either 1 if the record exists or 0 if it does not.
+VB
+```
+Dim parties = New IMu.Module("eparties", session)
+Dim hits = parties.FindKey(42)
+```
 
-### 3.1.2) The findKeys Method {#custom-id}
+The method returns the number of matches found, which is either `1` if the record exists or `0` if it does not.
 
-The `findKeys` method searches for a set of key values. The keys are passed as an array:
+### 3.1.2) The FindKeys Method {#custom-id}
+
+The `FindKeys` method searches for a set of key values. The keys are passed as an array:
+
+C#
+```
+using IMu;
+// ⋯
+Module parties = new Module("eparties", session);
+long[] keys = { 52, 42, 17 };
+long hits = parties.FindKeys(keys);
+```
+
+VB
+```
+Dim parties = New IMu.Module("eparties", session)
+Dim keys() As Long = {52, 42, 17}
+Dim hits = parties.FindKeys(keys)
 
 ```
-$parties = new IMuModule('eparties', $session);
-$keys = array(52, 42, 17);
-$hits = $parties->findKeys(keys);
+
+or as a `List`:
+
+C#
+```
+Module parties = new Module("eparties", session);
+List<long> keys = new List<long>();
+keys.Add(52);
+keys.Add(42);
+keys.Add(17);
+long hits = parties.FindKeys(keys);
+```
+
+VB
+```
+Dim parties = New IMu.Module("eparties", session)
+Dim keys New List(Of Long)
+keys.Add(1)
+keys.Add(2)
+keys.Add(3)
+Dim hits = parties.FindKeys(keys)
 ```
 
 The method returns the number of records found.
 
-### 3.1.3) The findTerms Method
+### 3.1.3) The FindTerms Method
 
-The `findTerms` method is the most flexible and powerful way to search for records within a module. It can be used to run simple single term queries or complex multi-term searches.
+The `FindTerms` method is the most flexible and powerful way to search for records within a module. It can be used to run simple single term queries or complex multi-term searches.
 
-The terms are specified using a `IMuTerms` object. Once a `IMuTerms` object has been created, add specific terms to it (using the `add` method) and then pass the `IMuTerms` object to the `findTerms` method. For example, to specify a Parties search for records which contain a first name of “John” and a last name of “Smith”:
+The terms are specified using a `Terms` object. Once a `Terms` object has been created, add specific terms to it (using the `Add` method) and then pass the `Terms` object to the `FindTerms` method. For example, to specify a Parties search for records which contain a first name of “John” and a last name of “Smith”:
 
+C#
 ```
-require_once IMu::$lib . '/Terms.php';
+Terms search = new Terms();
+search.Add("NamFirst", "John");
+search.Add("NamLast", "Smith");
+// ⋯
+long hits = parties.FindTerms(search);
+```
 
-$search = new IMuTerms();
-$search->add('NamFirst', 'John');
-$search->add('NamLast', 'Smith');
-
-$hits = $parties->findTerms($search);
+VB
+```
+Dim search = New Terms
+search.Add("NamFirst", "John")
+search.Add("NamLast", "Smith")
+' ⋯
+Dim hits = parties.FindTerms(search)
 ```
 
 There are several points to note:
 
-1. The first argument passed to the `add` method element contains the name of the column or an alias in the module to be searched.
-1. An alias associates a supplied value with one or more actual columns. Aliases are created using the `addSearchAlias` or `addSearchAliases` methods.
-1. The second argument contains the value to search for.
-1. Optionally, a comparison operator can be supplied as a third argument (see below examples). The operator specifies how the value supplied as the second argument should be matched.
+1. 
+    The first argument passed to the `Add` method element contains the name of the column or an alias in the module to be searched.
+1. 
+    An alias associates a supplied value with one or more actual columns. Aliases are created using the `AddSearchAlias` or `AddSearchAliases` methods.
+1. 
+    The second argument contains the value to search for.
+1. 
+    Optionally, a comparison operator can be supplied as a third argument (see below examples). The operator specifies how the value supplied as the second argument should be matched.
 
     Operators are the same as those used in TexQL (see KE’s [TexQL documentation](https://emu.kesoftware.com/downloads/Texpress/texql.pdf) for details). If not supplied, the operator defaults to “matches”.
 
@@ -256,139 +384,269 @@ There are several points to note:
 
 **Examples**
 
-1. To search for the name “Smith” in the last name field of the Parties module, the following term can be used:
+1. 
+    To search for the name “Smith” in the last name field of the Parties module, the following term can be used:
 
+    C#
     ```
-    $search = new IMuTerms();
-    $search->add('NamLast', 'Smith');
-    ```
-
-1. Specifying search terms for other types of columns is straightforward. For example, to search for records inserted on April 4, 2011:
-
-    ```
-    $search = new IMuTerms();
-    $search->add('AdmDateInserted', 'Apr 4 2011');
+    Terms search = new Terms();
+    search.Add("NamLast", "Smith");
     ```
 
-1. To search for records inserted before April 4, 2011, it is necessary to add an operator:
-
+    VB
     ```
-    $search = new IMuTerms();
-    $search->add('AdmDateInserted', 'Apr 4 2011', '<');
-    ```
-
-1. By default, the relationship between the terms is a Boolean `AND`. This means that to find records which match both a first name containing “John” and a last name containing “Smith” the `IMuTerms` object can be created as follows:
-
-    ```
-    $search = new IMuTerms();
-    $search->add('NamFirst', 'John');
-    $search->add('NamLast', 'Smith');
+    Dim search = New Terms
+    search.Add("NamLast", "Smith")
     ```
 
-1. IMuTerms object where the relationship between the terms is a Boolean `OR` can be created by passing the string value “OR” to the `IMuTerms` constructor:
+1. 
+    Specifying search terms for other types of columns is straightforward. For example, to search for records inserted on April 4, 2011:
 
+    C#
     ```
-    $search = new IMuTerms('OR');
-    $search->add('NamFirst', 'John');
-    $search->add('NamLast', 'Smith');
+    Terms search = new Terms();
+    search.Add("AdmDateInserted", "Apr 4 2011");
+    ```
+
+    VB
+    ```
+    Dim search = New Terms
+    search.Add("AdmDateInserted", "Apr 4 2011")
+    ```
+
+1. 
+    To search for records inserted before April 4, 2011, it is necessary to add an operator:
+
+    C#
+    ```
+    Terms search = new Terms();
+    search.Add("AdmDateInserted", "Apr 4 2011", "<");
+    ```
+
+    VB
+    ```
+    Dim search = New Terms
+    search.Add("AdmDateInserted", "Apr 4 2011", "<")
+    ```
+
+1. 
+    By default, the relationship between the terms is a Boolean `AND`. This means that to find records which match both a first name containing “John” and a last name containing “Smith” the `Terms` object can be created as follows:
+
+    C#
+    ```
+    Terms search = new Terms();
+    search.Add("NamFirst", "John");
+    search.Add("NamLast", "Smith");
+    ```
+
+    VB
+    ```
+    Dim search = New Terms
+    search.Add("NamFirst", "John")
+    search.Add("NamLast", "Smith")
+    ```
+
+1. 
+    IMuTerms object where the relationship between the terms is a Boolean `OR` can be created by passing the string value “OR” to the `Terms` constructor:
+
+    C#
+    ```
+    Terms search = new Terms(TermsKind.OR);
+    search.Add("NamFirst", "John");
+    search.Add("NamLast", "Smith");
+    ```
+
+    VB
+    ```
+    Dim search = New Terms(TermsKind.OR)
+    search.Add("NamFirst", "John")
+    search.Add("NamLast", "Smith")
     ```
 
     This specifies a search for records where either the first name contains “John” or the last name contains “Smith”.
 
-1. Combinations of `AND` and `OR` search terms can be created. The `addAnd` method adds a new set of `AND` terms to the original `IMuTerms` object. Similarly the `addOr` method adds a new set of `OR` terms. For example, to restrict the search for a first name of “John” and a last name of “Smith” to matching records inserted before April 4, 2011 or on May 1, 2011, specify:
+1. 
+    Combinations of `AND` and `OR` search terms can be created. The `addAnd` method adds a new set of `AND` terms to the original `Terms` object. Similarly the `AddOr` method adds a new set of `OR` terms. For example, to restrict the search for a first name of “John” and a last name of “Smith” to matching records inserted before April 4, 2011 or on May 1, 2011, specify:
 
+    C#
     ```
-    $search = new IMuTerms();
-    $search->add('NamFirst', 'John');
-    $search->add('NamLast', 'Smith');
-    $dates = $search->addOr();
-    $dates->add('AdmDateInserted', 'Apr 4 2011', '<');
-    $dates->add('AdmDateInserted', 'May 1 2011');
+    Terms search = new Terms();
+    search.Add("NamFirst", "John");
+    search.Add("NamLast", "Smith");
+
+    Terms dates = search.AddOr();
+    dates.Add("AdmDateInserted", "Apr 4 2011", "<");
+    dates.Add("AdmDateInserted", "May 1 2011");
     ```
 
-1. To run a search, pass the `IMuTerms` object to the `findTerms` method:
-
+    VB
     ```
-    $parties = new IMuModule('eparties', $session);
-    $search = new IMuTerms();
-    $search->add('NamLast', 'Smith');
-    $hits = $parties->findTerms($search);
+    Dim search = New Terms
+    search.Add("NamFirst", "John")
+    search.Add("NamLast", "Smith")
+
+    Dim dates = search.AddOr()
+    dates.Add("AdmDateInserted", "Apr 4 2011", "<")
+    dates.Add("AdmDateInserted", "May 1 2011")
+    ```
+
+1. 
+    To run a search, pass the `Terms` object to the `FindTerms` method:
+
+    C#
+    ```
+    Module parties = new Module("eparties", session);
+    Terms search = new Terms();
+    search.Add("NamLast", "Smith");
+    long hits = parties.FindTerms(search);
+    ```
+
+    VB
+    ```
+    Dim parties = New IMu.Module("eparties", session)
+    Dim search = New Terms
+    search.Add("NamFirst", "John")
+    Dim hits = parties.FindTerms(search)
     ```
 
     As with other find methods, the return value contains the estimated number of matches.
 
-1. To use a search alias, call the `addSearchAlias` method to associate the alias with one or more real column names before calling `findTerms`. Suppose we want to allow a user to search the Catalogue module for keywords. Our definition of a keywords search is to search the *SummaryData*, *CatSubjects_tab* and *NotNotes* columns. We could do this by building an `OR` search:
+1. 
+    To use a search alias, call the `AddSearchAlias` method to associate the alias with one or more real column names before calling `FindTerms`.
+    
+    Suppose we want to allow a user to search the Catalogue module for keywords. Our definition of a keywords search is to search the *SummaryData*, *CatSubjects_tab* and *NotNotes* columns. We could do this by building an `OR` search:
 
+    C#
     ```
-    $keyword = '⋯';
+    string keyword = "⋯";
     // ⋯
-    $search = new IMuTerms('OR');
-    $search->add('SummaryData', $keyword);
-    $search->add('CatSubjects_tab', $keyword);
-    $search->add('NotNotes', $keyword);
+    Terms search = new Terms(TermsKind.OR);
+    search.Add("SummaryData", keyword);
+    search.Add("CatSubjects_tab", keyword);
+    search.Add("NotNotes", keyword);
+    ```
+
+    VB
+    ```
+    Dim keyword As String = "⋯"
+    ' ⋯
+    Dim search = New Terms(TermsKind.OR)
+    search.Add("SummaryData", keyword)
+    search.Add("CatSubjects_tab", keyword)
+    search.Add("NotNotes", keyword)
     ```
 
     Another way of doing this is to register the association between the name *keywords* and the three columns we are interested in and then pass the name *keywords* as the column to be searched:
 
+    C#
     ```
-    $keyword = '⋯';
+    string keyword = "⋯";
     // ⋯
-    $catalogue = new IMu::Module('ecatalogue', $session);
-    $columns = array
-    (
-        'SummaryData',
-        'CatSubjects_tab',
-        'NotNotes'
-    );
-    $catalogue->addSearchAlias('keywords', $columns);
+    Module catalogue = new Module("ecatalogue", session);
+    string[] columns =
+    {
+        "SummaryData",
+        "CatSubjects_tab",
+        "NotNotes"
+    };
+    catalogue.AddSearchAlias("keywords", columns);
     // ⋯
-    $search = new IMuTerms();
-    $search->add('keywords', $keyword);
-    $catalogue->findTerms($search);
+    Terms search = new Terms();
+    search.Add("keywords", keyword);
+    catalogue.FindTerms(search);
+    ```
+
+    VB
+    ```
+    Dim keyword As String = "⋯"
+    ' ⋯
+    Dim catalogue = new IMu.Module("ecatalogue", session)
+    Dim columns() As String =
+    {
+        "SummaryData",
+        "NamRoles_tab",
+        "NotNotes"
+    }
+    catalogue.AddSearchAlias("keywords", columns)
+    ' ⋯
+    Dim search = New Terms
+    search.Add("keywords", keyword)
+    catalogue.FindTerms(search)
     ```
 
     An alternative to passing the columns as an array of strings is to pass a single string, with the column names separated by semi-colons:
 
+    C#
     ```
-    $keyword = '⋯';
+    string keyword = "⋯";
     // ⋯
-    $catalogue = new IMuModule('ecatalogue', $session);
-    $columns = 'SummaryData;CatSubjects_tab;NotNotes';
-    $catalogue->addSearchAlias('keywords', $columns);
+    Module catalogue = new Module("ecatalogue", session);
+    string columns = "SummaryData;CatSubjects_tab;NotNotes";
+    catalogue.AddSearchAlias("keywords", columns);
     // ⋯
-    $search = new IMuTerms();
-    $search->add('keywords', $keyword);
-    $catalogue->findTerms($search);
+    Terms search = new Terms();
+    search.Add("keywords", keyword);
+    catalogue.FindTerms(search);
+    ```
+
+    VB
+    ```
+    Dim keyword As String = "⋯"
+    ' ⋯
+    Dim catalogue = new IMu.Module("ecatalogue", session)
+    Dim columns = "SummaryData;CatSubjects_tab;NotNotes"
+    catalogue.AddSearchAlias("keywords", columns)
+    ' ⋯
+    Dim search = New Terms
+    search.Add("keywords", keyword)
+    catalogue.FindTerms(search)
     ```
 
     The advantage of using a search alias is that once the alias is registered a simple name can be used to specify a more complex `OR` search.
 
-1. To add more than one alias at a time, build an associative array of names and columns and call the `addSearchAliases` method:
+1. 
+    To add more than one alias at a time, build an associative array of names and columns and call the `AddSearchAliases` method:
 
+    C#
     ```
-    $aliases = array
-    (
-        'keywords' => 'SummaryData;CatSubjects_tab;NotNotes',
-        'title' => 'SummaryData;TitMainTitle'
-    );
-    $module->addSearchAliases($aliases);
+    Map aliases = new Map();
+    aliases.Add("keywords", "SummaryData;CatSubjects_tab;NotNotes");
+    aliases.Add("title", "SummaryData;TitMainTitle");
+    catalogue.AddSearchAliases(aliases);
     ```
 
-### 3.1.4) The findWhere Method
+    VB
+    ```
+    Dim aliases = New Map
+    aliases.Add("keywords", "SummaryData;CatSubjects_tab;NotNotes")
+    aliases.Add("title", "SummaryData;TitMainTitle")
+    catalogue.AddSearchAliases(aliases)
+    ```
 
-With the `findWhere` method it is possible to submit a complete TexQL *where* clause:
+### 3.1.4) The FindWhere Method
 
+With the `FindWhere` method it is possible to submit a complete TexQL *where* clause:
+
+C#
 ```
-$parties = new IMuModule('eparties', $session);
-$where = "NamLast contains 'Smith'";
-$hits = $parties->findWhere($where);
+Module parties = new Module("eparties", session);
+string where = "NamLast contains 'Smith'";
+long hits = parties.FindWhere(where);
 ```
 
-Although this method provides complete control over exactly how a search is run, it is generally better to use `findTerms` to submit a search rather than building a where clause. There are (at least) two reasons to prefer `findTerms` over `findWhere`:
+VB
+```
+Dim parties = New IMu.Module("eparties", session)
+Dim where = "NamLast contains 'Smith'"
+Dim hits = parties.FindWhere(where)
+```
 
-1. Building the *where* clause requires the code to have detailed knowledge of the data type and structure of each column. The `findTerms` method leaves this task to the server.
+Although this method provides complete control over exactly how a search is run, it is generally better to use `FindTerms` to submit a search rather than building a where clause. There are (at least) two reasons to prefer `FindTerms` over `FindWhere`:
 
-    For example, specifying the term to search for a particular value in a nested table is straightforward. To find Parties records where the Roles nested table contains Artist, `findTerms` simply requires:
+1. 
+    Building the *where* clause requires the code to have detailed knowledge of the data type and structure of each column. The `FindTerms` method leaves this task to the server.
+
+    For example, specifying the term to search for a particular value in a nested table is straightforward. To find Parties records where the Roles nested table contains Artist, `FindTerms` simply requires:
     
     ```
     $search->add('NamRoles_tab', 'Artist');
@@ -402,15 +660,16 @@ Although this method provides complete control over exactly how a search is run,
 
     The TexQL for double nested tables is even more complex.
 
-1. More importantly, findTerms is more secure.
+1. 
+    More importantly, findTerms is more secure.
 
-    With `findTerms` a set of terms is submitted to the server which then builds the TexQL *where* clause. This makes it much easier for the server to check for terms which may contain SQL-injection style attacks and to avoid them.
+    With `FindTerms` a set of terms is submitted to the server which then builds the TexQL *where* clause. This makes it much easier for the server to check for terms which may contain SQL-injection style attacks and to avoid them.
     
-    If your code builds a *where* clause from user-entered data so it can be run using `findWhere`, it is much more difficult, if not impossible, for the server to check and avoid SQL-injection. The responsibility for checking for SQL-injection becomes yours.
+    If your code builds a *where* clause from user-entered data so it can be run using `FindWhere`, it is much more difficult, if not impossible, for the server to check and avoid SQL-injection. The responsibility for checking for SQL-injection becomes yours.
 
 ### 3.1.5) Number of Matches
 
-All of the *find* methods return the number of matches found by the search. For `findKey` and `findKeys` this number is always the exact number of matches found. The number returned by `findTerms` and `findWhere` is best thought of as an estimate.
+All of the *find* methods return the number of matches found by the search. For `FindKey` and `FindKeys` this number is always the exact number of matches found. The number returned by `FindTerms` and `FindWhere` is best thought of as an estimate.
 
 This estimate is almost always correct but because of the nature of the indexing used by the server’s data engine (Texpress) the number can sometimes be an over-estimate of the real number of matches. This is similar to the estimated number of hits returned by a Google search.
 
@@ -418,14 +677,15 @@ This estimate is almost always correct but because of the nature of the indexing
 
 ### 3.2.1) The sort Method
 
-The `IMuModule` class `sort` method is used to order a set of matching records once the search of a module has been run.
+The `Module` class `Sort` method is used to order a set of matching records once the search of a module has been run.
 
 #### Arguments
 
-This ``sort`` method takes two arguments:
+This `Sort` method takes two arguments:
+
 * **columns**
 
-    The *columns* argument is used to specify the columns by which to sort the result set. The value of the argument can be either a string or a reference to an array of strings. Each string can be a simple column name or a set of column names, separated by semi-colons or commas.
+    The *columns* argument is used to specify the columns by which to sort the result set. The argument can be either a `string`, `string[]` or a `List<string>`. Each string can be a simple column name or a set of column names, separated by semi-colons or commas.
 
     Each column name can be preceded by a `+` (plus) or `-` (minus or dash). A leading `+` indicates that the records should be sorted in ascending order. A leading `-` indicates that the records should be sorted in descending order.
 
@@ -435,7 +695,7 @@ This ``sort`` method takes two arguments:
 
 * **flags**
 
-    The *flags* argument is used to pass one or more flags to control the way the sort is carried out. As with the *columns* argument, the *flags* argument can be a string or a reference to an array of strings. Each string can be a single flag or a set of flags separated by semi-colons or commas.
+    The *flags* argument is used to pass one or more flags to control the way the sort is carried out. As with the *columns* argument, the *flags* argument can be a `string`, `string[]` or a `List<string>`. Each `string` can be a single flag or a set of flags separated by semi-colons or commas.
 
     The following flags control the type of comparisons used when sorting:
 
@@ -545,60 +805,119 @@ For example:
 
 1. Sort parties by first name (ascending):
 
+    C#
     ```
-    $parties = new IMuModule('eparties', $session);
-    $search = new IMuTerms();
-    $search->add('NamLast', 'Smith');
-    $hits = $parties->findTerms($search);
+    Module parties = new Module("eparties", session);
+    Terms search = new Terms();
+    search.Add("NamLast", "Smith");
+    long hits = parties.FindTerms(search);
+    parties.Sort("NamFirst");
+    ```
 
-    $parties->sort('NamFirst');
+    VB
+    ```
+    Dim parties = new IMu.Module("eparties", session)
+    Dim search = New Terms
+    search.Add("NamLast", "Smith")
+    Dim hits = parties.FindTerms(search)
+    parties.Sort("NamFirst")
     ```
 
 1. Sort parties by title (ascending) and then first name (descending):
 
+    C#
     ```
-    $sort = array
-    (
-        'NamTitle',
-        '-NamFirst'
-    );
-    $parties->sort($sort);
+    Module parties = new Module("eparties", session);
+    Terms search = new Terms();
+    search.Add("NamLast", "Smith");
+    parties.FindTerms(search);
+    string[] columns =
+    {
+        "NamTitle",
+        "-NamFirst"
+    };
+    parties.Sort(sort);
+    ```
+
+    VB
+    ```
+    Dim parties = new IMu.Module("eparties", session)
+    Dim search = New Terms
+    search.Add("NamLast", "Smith")
+    parties.FindTerms(search)
+    Dim columns() =
+    {
+        "NamTitle",
+        "-NamFirst"
+    }
+    parties.Sort(sort)
     ```
 
 1. Run a case-sensitive sort of parties by title (ascending) and then first name (descending):
 
+    C#
     ```
-    $sort = array
-    (
-        'NamTitle',
-        '-NamFirst'
-    );
-    $flags = array
-    (
-        'case-sensitive'
-    );
-    $parties->sort($sort, $flags);
+    Module parties = new Module("eparties", session);
+    Terms search = new Terms();
+    search.Add("NamLast", "Smith");
+    parties.FindTerms(search);
+    string[] columns =
+    {
+        "NamTitle",
+        "-NamFirst"
+    };
+    string[] flags =
+    {
+        "case-sensitive"
+    };
+    parties.Sort(sort, flags);
+    ```
+
+    VB
+    ```
+    Dim parties = new IMu.Module("eparties", session)
+    Dim search = New Terms
+    search.Add("NamLast", "Smith")
+    parties.FindTerms(search)
+    Dim columns() =
+    {
+        "NamTitle",
+        "-NamFirst"
+    }
+    Dim columns() =
+    {
+        "case-sensitive"
+    }
+    parties.Sort(sort, flags)
     ```
 
 ### 3.2.2) Return Value
 
-The `sort` method returns `null` unless the *report* flag is used.
+The `Sort` method returns `null` unless the *report* flag is used.
 
-If the *report* flag is used, the `sort` method returns an array representing a list of distinct terms associated with the primary column in the sorted result set.
+If the *report* flag is used, the `Sort` method returns a `ModuleSortResult` object. This object contains two read-only properties.
 
-Each element in the array is an associative array. The associative array contains three elements which describe the term:
+* **Count**
 
-* **value**
+    An `int` specifying the number of distinct terms in the primary sort key.
+
+* **Terms**
+
+    A `ModuleSortTerm[]` containing the list of distinct terms associated with the primary key in the sorted result set.
+
+This `ModuleSortTerm` object contains three read-only properties which describe the term:
+
+* **Value**
     
-    A string that is the distict value itself.
+    A `String` that is the distict value itself.
 
-* **count**
+* **Count**
 
-    An integer specifying the number of records in the result set which have the value.
+    A `long` specifying the number of records in the result set which have the value.
 
-* **list**
+* **Nested**
 
-    A nested array that holds the values for secondary sorts within the primary sort.
+    A `ModuleSortResult` object that holds the values for secondary sorts within the primary sort.
 
 This is illustrated in the following example.
 
@@ -607,43 +926,57 @@ This is illustrated in the following example.
 This example shows a three-level sort by title, last name (descending) and first name on a set of Parties records:
 
 ```
-$parties = new IMuModule('eparties', $session);
+using System;
+using IMu;
 
-$terms = new IMuTerms('or');
-$terms->add('NamLast', 'Smith');
-$terms->add('NamLast', 'Wood');
-
-$hits = $parties->findTerms($terms);
-
-$sort = array
-(
-    'NamTitle',
-    '-NamLast',
-    'NamFirst'
-);
-$flags = array
-(
-    'full-text',
-    'report'
-);
-$report = $parties->sort($sort, $flags);
-showSummary($report, 0);
-exit(0);
-
-function showSummary($report, $indent)
+class Program
 {
-    $prefix = '';
-    for ($i = 0; $i < $indent; $i++)
-        $prefix .= '  ';
-
-    foreach ($report as $term)
+    static void Main(string[] args)
     {
-        $value = $term['value'];
-        $count = $term['count'];
-        printf("%s%s (%d)\n", $prefix, $value, $count);
+        Session session = new Session("imu.mel.kesoftware.com", 40136);
+        Module parties = new Module("eparties", session);
 
-		if (isset($term['list']))
-        	showSummary($term['list'], $indent + 1);
+        Terms terms = new Terms(TermsKind.OR);
+        terms.Add("NamLast", "Smith");
+        terms.Add("NamLast", "Wood");
+
+        long hits = parties.FindTerms(terms);
+
+        String[] sort =
+        {
+            "NamTitle",
+            "-NamLast",
+            "NamFirst"
+        };
+        String[] flags = 
+        {
+            "full-text",
+            "report"
+        };
+        ModuleSortResult report = parties.Sort(sort, flags);
+        showSummary(report, 0);
+        Environment.Exit(0);
+    }
+
+    private static void showSummary(ModuleSortResult report, int indent)
+    {
+        String prefix = "";
+        for (int i = 0; i < indent; i++)
+            prefix += "  ";
+
+        ModuleSortTerm[] terms = report.Terms;
+        for (int i = 0; i < terms.Length; i++)
+        {
+            ModuleSortTerm term = terms[i];
+
+            String value = term.Value;
+            long count = term.Count;
+            Console.WriteLine("{0}{1} ({2})", prefix, value, count);
+
+            ModuleSortResult nested = term.Nested;
+            if (nested != null)
+                showSummary(nested, indent + 1);
+        }
     }
 }
 ```
@@ -680,40 +1013,41 @@ If another sort key was specified its terms would be nested under the tertiary k
 
 ### 3.3.1) The fetch Method
 
-The `IMuModule` class [fetch](TODO-link-to-reference) method is used to get information from the matching records once the search of a module has been run. The server maintains the set of matching records in a list and the `fetch` method can be used to retrieve any information from any contiguous block of records in the list.
+The `Module` class [Fetch](TODO-link-to-reference) method is used to get information from the matching records once the search of a module has been run. The server maintains the set of matching records in a list and the `Fetch` method can be used to retrieve any information from any contiguous block of records in the list.
 
 #### Arguments
 
-The `fetch` method has four arguments:
+The `Fetch` method has four arguments:
 
 * **flag**
+
 * **offset**
 
     Together the *flag* and *offset* arguments define the starting position of the block of records to be fetched. The *flag* argument is a string and must be one of:
 
-    * start
-    * current
-    * end
+    * `start`
+    * `current`
+    * `end`
 
-    The “start” and “end” flags refer to the first record and the last record in the matching set. The “current” flag refers to the position of the last record fetched by the previous call to the `fetch` method. If the `fetch` method has not been called, “current” refers to the first record in the matching set.
+    The `start` and `end` flags refer to the first record and the last record in the matching set. The “current” flag refers to the position of the last record fetched by the previous call to the `Fetch` method. If the `Fetch` method has not been called, `current` refers to the first record in the matching set.
 
     The *offset* argument is an integer. It adjusts the starting position relative to the value of the *flag* argument. A positive value for *offset* specifies a start after the position specified by *flag* and a negative value specifies a start before the position specified by *flag*.
 
-    For example, calling `fetch` with a *flag* of “start” and *offset* of 3 will return records starting from the fourth record in the matching set. Specifying a *flag* of “end” and an *offset* of -8 will return records starting from the ninth last record in the matching set.
+    For example, calling `Fetch` with a *flag* of `start` and *offset* of `3` will return records starting from the fourth record in the matching set. Specifying a *flag* of `end` and an *offset* of `-8` will return records starting from the ninth last record in the matching set.
 
-    To retrieve the next record after the last returned by the previous `fetch`, you would pass a *flag* of “current” and an *offset* of 1.
+    To retrieve the next record after the last returned by the previous `Fetch`, you would pass a *flag* of `current` and an *offset* of `1`.
 
 * **count**
 
     The *count* argument specifies the maximum number of records to be retrieved.
 
-    Passing a count value of 0 is valid. This causes `fetch` to change the current record without actually retrieving any data.
+    Passing a count value of `0` is valid. This causes `Fetch` to change the current record without actually retrieving any data.
 
-    Using a negative value for *count* is also valid. This causes `fetch` to return all the records in the matching set from the starting position (specified by *flag* and *offset*).
+    Using a negative value for *count* is also valid. This causes `Fetch` to return all the records in the matching set from the starting position (specified by *flag* and *offset*).
 
 * **columns**
 
-    The optional columns argument is used to specify which columns should be included in the returned records. The argument can be either a string or a reference to an array of strings. In its simplest form each string contains a single column name, or several column names separated by semi-colons or commas.
+    The optional columns argument is used to specify which columns should be included in the returned records. The argument can be either a `String`, `String[]` or a `List<string>`. In its simplest form each `String` contains a single column name, or several column names separated by semi-colons or commas.
 
     The value of the columns argument can be more than simple column names. See the section on [Specifying Columns](#3.3.2\)-Specifying-Columns) for details.
 
@@ -721,94 +1055,157 @@ For example:
 
 1. Retrieve the first record from the start of a set of matching records:
 
+    C#
     ```
-    $parties = new IMuModule('eparties', $session);
-    $columns = 'NamFirst,NamLast';
-    $result = $parties->fetch('start', 0, 1, $columns);
+    Module parties = new Module("eparties", session);
+    string columns = "NamFirst;NamLast";
+    ModuleFetchResult result = parties.Fetch("start", 0, 1, columns);
+    ```
+
+    VB
+    ```
+    Dim parties = New IMu.Module("eparties", session)
+    Dim columns = "NamFirst;NamLast"
+    Dim result = parties.Fetch("start", 0, 1, columns)
     ```
 
     The *columns* argument can also be specified as an array reference:
 
+    C#
     ```
-    $parties = new IMuModule('eparties', $session);
-    $columns = array
-    (
-        'NamFirst',
-        'NamLast'
-    );
-    $result = $parties->fetch('start', 0, 1, $columns);
+    Module parties = new Module("eparties", session);
+    string[] columns =
+    {
+        "NamFirst",
+        "NamLast"
+    };
+    ModuleFetchResult result = parties.Fetch("start", 0, 1, columns);
+    ```
+
+    VB
+    ```
+    Dim parties = New IMu.Module("eparties", session)
+    Dim columns() =
+    {
+        "NamFirst",
+        "NamLast"
+    }
+    Dim result = parties.Fetch("start", 0, 1, columns)
     ```
 
 1. Return all of the results in a matching set:
 
+    C#
     ```
-    $parties = new IMuModule('eparties', $session);
-    $columns = array
-    (
-        'NamFirst',
-        'NamLast'
-    );
-    $result = $parties->fetch('start', 0, -1, $columns);
+    Module parties = new Module("eparties", session);
+    string[] columns =
+    {
+        "NamFirst",
+        "NamLast"
+    };
+    ModuleFetchResult result = parties.Fetch("start", 0, -1, columns);
+    ```
+
+    VB
+    ```
+    Dim parties = New IMu.Module("eparties", session)
+    Dim columns() =
+    {
+        "NamFirst",
+        "NamLast"
+    }
+    Dim result = parties.Fetch("start", 0, -1, columns)
     ```
 
 1. Change the current record to the next record in the set of matching records without retrieving any data:
 
+    C#
     ```
-    $parties->fetch('current', 1, 0);
+    parties.Fetch("start", 1, 0);
+    ```
+
+    VB
+    ```
+    parties.Fetch("start", 1, 0)
     ```
 
 1. Retrieve the last record from the end of a set of matching records:
 
+    C#
     ```
-    $parties = new IMuModule('eparties', $session);
-    $columns = array
-    (
-        'NamFirst',
-        'NamLast'
-    );
-    $result = $parties->fetch('end', 0, 1, $columns);
+    Module parties = new Module("eparties", session);
+    string[] columns =
+    {
+        "NamFirst",
+        "NamLast"
+    };
+    ModuleFetchResult result = parties.Fetch("end", 0, 1, columns);
+    ```
+
+    VB
+    ```
+    Dim parties = New IMu.Module("eparties", session)
+    Dim columns() =
+    {
+        "NamFirst",
+        "NamLast"
+    }
+    Dim result = parties.Fetch("end", 0, 1, columns)
     ```
 
 #### Return Value
 
 
-The `fetch` method returns records requested in an [IMuModuleFetchResult](TODO-link-to-reference) object. It contains three members:
+The `Fetch` method returns records requested in an [ModuleFetchResult](TODO-link-to-reference) object. It contains three members:
 
-* **count**
+* **Count**
 
-    The number of records returned by the `fetch` request.
+    The number of records returned by the `Fetch` request.
 
-* **hits**
+* **Hits**
 
-    The estimated number of matches in the result set. This number is returned for each `fetch` because the estimate can decrease as records in the result set are processed by the `fetch` method.
+    The estimated number of matches in the result set. This number is returned for each `Fetch` because the estimate can decrease as records in the result set are processed by the `Fetch` method.
 
-* **rows**
+* **Rows**
 
-    A reference to an array containing the set of records requested. Each element of the *rows* array is itself a reference to a hash. Each hash contains entries for each column requested.
+    The Rows property is an array containing the set of records requested. Each element of the Rows array is itself a Map object. Each Map object contains entries for each column requested.
+    
+    > **Note:**
+    >
+    >The IMu `Map` class is a subclass of .Net’s standard `Dictionary`. It defines its key type to be a string. It also provides some convenience methods for converting the types of elements stored in the map. See Reference for details.
 
-For example, retrieve the *count* & *hits* properties and iterate over all of the returned records using the *rows* property:
+For example, retrieve the *Count* & *Hits* properties and iterate over all of the returned records using the *rows* property:
 
+C#
 ```
-$columns = array
-(
-    'NamFirst',
-    'NamLast'
-);
-$result = $parties->fetch('start', 0, 2, $columns);
-$count = $result->count;
-$hits = $result->hits;
-
-print("Count: $count\n");
-print("Hits: $hits\n");
-print("Rows:\n");
-foreach ($result->rows as $row)
+String[] columns =
 {
-    $rowNum = $row['rownum'];
-    $irn = $row['irn'];
-    $firstName = $row['NamFirst'];
-    $lastName = $row['NamLast'];
-    printf("  %d. %s, %s (%d)\n", $rowNum, $lastName, $firstName, $irn);
+    "NamFirst",
+    "NamLast"
+};
+
+ModuleFetchResult result = parties.Fetch("start", 0, 2, columns);
+long count = result.Count;
+long hits = result.Hits;
+
+Console.WriteLine("Count: {0}", count);
+Console.WriteLine("Hits: {0}", hits);
+Console.WriteLine("Rows:");
+foreach (IMu.Map row in result.Rows)
+{
+    int rowNum = row.GetInt("rownum");
+    long irn = row.GetInt("irn");
+    String first = row.GetString("NamFirst");
+    String last = row.GetString("NamLast");
+
+    Console.WriteLine("  {0}. {1}, {2} ({3})", rowNum, last, first,
+            irn);
 }
+```
+
+VB
+```
+// TODO
 ```
 
 This will produce output similar to the following:
@@ -823,7 +1220,7 @@ Rows:
 
 ### 3.3.2) Specifying Columns
 
-This section specifies the values that can be included or used as the columns arguments to the `IMuModule` class `fetch` method.
+This section specifies the values that can be included or used as the columns arguments to the `Module` class `Fetch` method.
 
 #### Atomic Columns
 
@@ -835,17 +1232,33 @@ NamFirst
 
 The values of atomic columns are returned as strings:
 
+C#
 ```
-$columns = array
-(
-    'NamFirst'
-);
-$result = $parties->fetch('start', 0, 1, $columns);
-foreach ($result->rows as $row)
+string[] columns =
 {
-    $first = $row['NamFirst'];
+    "NamFirst"
+};
+ModuleFetchResult result = parties.Fetch("start", 0, -1, columns);
+for (int i = 0; i < rows.Length; i++)
+{
+    Map row = rows[i];
+    string first = row.GetString("NamFirst");
     // ⋯
 }
+```
+
+VB
+```
+Dim columns() =
+{
+    "NamFirst"
+}
+Dim result = parties.Fetch("start", 0, -1, columns)
+For i = 0 To rows.Length - 1
+    Dim row = rows(i)
+    Dim first = row.GetString("NamFirst")
+    ' ⋯
+Next
 ```
 
 #### Nested Tabes
@@ -858,20 +1271,36 @@ NamRoles_tab
 
 The values of nested tables are returned as an array. Each array member is a string that corresponds to a row from the nested table:
 
+C#
 ```
-$columns = array
-(
-    'NamRoles_tab'
-);
-$result = $parties->fetch('start', 0, 1, $columns);
-foreach ($result->rows as $row)
+string[] columns =
 {
-    $roles = $row['NamRoles_tab'];
-    foreach ($roles as $role)
+    "NamRoles_tab"
+};
+ModuleFetchResult result = parties.Fetch("start", 0, -1, columns);
+    IMu.Map[] rows = result.Rows;
+    foreach (IMu.Map row in rows)
+{
+    String[] roles = row.GetStrings("NamRoles_tab");
+    foreach (String role in roles)
     {
         // ⋯
     }
 }
+```
+
+VB
+```
+Dim columns() =
+{
+    "NamRoles_tab"
+}
+Dim result = parties.Fetch("start", 0, -1, columns)
+For i = 0 To rows.Length - 1
+    Dim row = rows(i)
+    Dim first = row.GetString("NamFirst")
+    ' ⋯
+Next
 ```
 
 #### Columns From Attached Records
@@ -890,22 +1319,27 @@ SynSynonymyRef_tab.(NamFirst,NamLast)
 
 The return values of columns from attached records depends on the type of the attachment column. If the attachment column is atomic then the column values are returned as an associative array. If the attachment column is a nested table the values are returned as an array. Each array member is an associative array containing the requested column values for each attached record:
 
+C#
 ```
-$columns = array
-(
-    'SynSynonymyRef_tab.(NamFirst,NamLast)'
-);
-$result = $parties->fetch('start', 0, 1, $columns);
-foreach ($result->rows as $row)
+String[] columns =
 {
-    $synonymies = $row['SynSynonymyRef_tab'];
-    foreach ($synonymies as $synonymy)
+    "SynSynonymyRef_tab.(NamFirst,NamLast)"
+};
+ModuleFetchResult result = partiesFetch("start", 0, 1, columns);
+foreach (IMu.Map row in result.Rows)
+{
+    foreach (IMu.Map synonymy in row.GetMaps("SynSynonymyRef_tab"))
     {
-        $first = $synonymy['NamFirst'];
-        $last = $synonymy['NamLast'];
+        String first = synonymy.GetString("NamFirst");
+        String last = synonymy.GetString("NamLast");
         // ⋯
     }
 }
+```
+
+VB
+```
+// TODO
 ```
 
 #### Columns Grom Reverse Attachments
@@ -914,13 +1348,15 @@ A reverse attachment allows you to specify columns from other records in the sam
 
 For example:
 
-1. Retrieve the *TitMainTitle* (Main Title) column for all Catalogue records that have the current Parties record attached to their *CreCreatorRef_tab* (Creator) column:
+1. 
+    Retrieve the *TitMainTitle* (Main Title) column for all Catalogue records that have the current Parties record attached to their *CreCreatorRef_tab* (Creator) column:
 
     ```
     <ecatalogue:CreCreatorRef_tab>.TitMainTitle
     ```
 
-1. Retrieve the *NarTitle* (Title) column for all Narratives records that have the current Narrative record attached to their *HieChildNarrativesRef_tab* (Child Narratives) column:
+1. 
+    Retrieve the *NarTitle* (Title) column for all Narratives records that have the current Narrative record attached to their *HieChildNarrativesRef_tab* (Child Narratives) column:
 
     ```
     <enarratives:HieChildNarrativesRef_tab>.NarTitle
@@ -934,22 +1370,27 @@ Multiple columns can be specified from the reverse attachment record:
 
 Reverse attachments are returned as an array. Each array member is an associative array containing the requested column values from each record from the specified module (The Catalogue module in the example below) that has the current record attached to the specified column (The *CreCreatorRef_tab* column in the example below):
 
+C#
 ```
-$columns = array
-(
-    '<ecatalogue:CreCreatorRef_tab>.(TitMainTitle,TitObjectCategory)'
-);
-$result = $parties->fetch('start', 0, 1, $columns);
-foreach ($result->rows as $row)
+String[] columns =
 {
-    $objects = $row['ecatalogue:CreCreatorRef_tab'];
-    foreach ($objects as $object)
+    "<ecatalogue:CreCreatorRef_tab>.(TitMainTitle,TitObjectCategory)"
+};
+ModuleFetchResult result = parties.Fetch("start", 0, 1, columns);
+foreach (IMu.Map row in result.Rows)
+{
+    foreach (IMu.Map object in row.GetMaps("ecatalogue:CreCreatorRef_tab"))
     {
-        $title = $object['TitMainTitle'];
-        $category = $object['TitObjectCategory'];
+        String title = object.GetString("TitMainTitle");
+        String category = object.GetString("TitObjectCategory");
         // ⋯
     }
 }
+```
+
+VB
+```
+// TODO
 ```
 
 #### Grouped Nested Tables
@@ -970,24 +1411,28 @@ contributors=[NarContributorRef_tab.SummaryData,NarContributorRole_tab]
 
 The grouped nested tables are returned as an array. Each array member is an associative array containing corresponding rows from the nested tables:
 
+C#
 ```
-$columns = array
-(
-    '[NarContributorRef_tab.SummaryData,NarContributorRole_tab]'
-);
-$result = $narratives->fetch('start', 0, 1, $columns);
-foreach ($result->rows as $row)
+String[] columns =
 {
-    $groupedRows = $row['group1'];
-    foreach ($groupedRows as $groupedRow)
+    "[NarContributorRef_tab.SummaryData,NarContributorRole_tab]"
+};
+ModuleFetchResult result = narratives-Fetch('start', 0, 1, columns);
+foreach (IMu.Map row in result.Rows)
+{
+    foreach (IMu.Map group in row.GetMaps("group1"))
     {
-        /* NarContributorRef_tab is an attachment column. */
-        $contributor = $groupedRow['NarContributorRef_tab'];
-        $summary = $contributor['SummaryData'];
-        $role = $groupedRow['NarContributorRole_tab'];
+        IMu.Map contributor = group.GetMap("NarContributorRef_tab");
+        String summary = contributor.GetString("SummaryData");
+        String role = group.GetString("NarContributorRole_tab");
         // ⋯
     }
 }
+```
+
+VB
+```
+// TODO
 ```
 
 #### Virtual Columns
@@ -1004,19 +1449,25 @@ Virtual columns are columns that do not actually exist in the EMu table being ac
 
     Returns the modification date and time of the record using the format `YYYY-MM-DDThh:mm:ss`.
 
+    C#
     ```
-    $columns = array
-    (
-        'insertedTimeStamp',
-        'modifiedTimeStamp'
-    );
-    $result = $parties->fetch('start', 0, 1, $columns);
-    foreach ($result->rows as $row)
+    String[] columns =
     {
-        $inserted = $row['insertedTimeStamp'];
-        $modified = $row['modifiedTimeStamp'];
-        # ⋯
+        "insertedTimeStamp",
+        "modifiedTimeStamp"
+    };
+    ModuleFetchResult result = parties.Fetch("start", 0, 1, columns);
+    foreach (IMu.Map row in result.Rows)
+    {
+        String inserted = row.GetString("insertedTimeStamp");
+        String modified = row.GetString("modifiedTimeStamp");
+        // ⋯
     }
+    ```
+
+    VB
+    ```
+    // TODO
     ```
 
 **The following virtual columns can be used in any EMu module except Multimedia:**
@@ -1107,74 +1558,91 @@ See [Multimedia](#3.4\)-multimedia) for more information.
 
 #### Fetch Sets
 
-A fetch set allows you to pre-register a group of columns by a single name. That name can then be passed to the `fetch` method to retrieve the specified columns.
+A fetch set allows you to pre-register a group of columns by a single name. That name can then be passed to the `Fetch` method to retrieve the specified columns.
 
-Fetch sets are useful if the `fetch` method will be called several times with the same set of columns because:
+Fetch sets are useful if the `Fetch` method will be called several times with the same set of columns because:
 
-* The required columns do no have to be specified every time the `fetch` method is called. This is useful when [maintaining state](#4\)-Maintaining-State).
+* The required columns do no have to be specified every time the `Fetch` method is called. This is useful when [maintaining state](#4\)-Maintaining-State).
 
-* Every time the `fetch` method is called the IMu server must parse the supplied columns and check them against the EMu schema. For complex column sets, particularly those involving several references or reverse references, this can take time.
+* Every time the `Fetch` method is called the IMu server must parse the supplied columns and check them against the EMu schema. For complex column sets, particularly those involving several references or reverse references, this can take time.
 
-The `IMuModule` class `addFetchSet` method is used to register a set of columns. This method takes two arguments:
+The `Module` class `AddFetchSet` method is used to register a set of columns. This method takes two arguments:
 
 * **name**
 
-    The name to use for the column set. The value of this argument can be passed to any call to the `fetch` method and the set of columns specified by the *columns* argument will be returned.
+    The name to use for the column set. The value of this argument can be passed to any call to the `Fetch` method and the set of columns specified by the *columns* argument will be returned.
 
 * **columns**
 
-    The set of columns to be associated with the name argument.
+    The set of columns to be associated with the *name* argument.
 
-The `IMuModule` class `addFetchSets` method is similar except that multiple sets can be registered at one time.
+The `Module` class `SAddFetchSets` method is similar except that multiple sets can be registered at one time.
 
-The results are returned as if you had supplied the columns directly to the `fetch` method.
+The results are returned as if you had supplied the columns directly to the `Fetch` method.
 
 For example:
 
-1. Add a single fetch set using the addFetchSet method:
+1. Add a single fetch set using the `AddFetchSet` method:
 
+    C#
     ```
-    $columns = array
-    (
-        'NamFirst',
-        'NamLast',
-        'NamRoles_tab'
-    );
-    $parties->addFetchSet('person_details', $columns);
-    ```
-
-1. Add multiple fetch sets using the `addFetchSets` method:
-
-    ```
-    $sets = array
-    (
-        'person_details' => array('NamFirst', 'NamLast', 'NamRoles_tab'),
-        'organisation_details' =>
-            array('NamOrganisation', 'NamOrganisationAcronym')
-    );
-    $module->addFetchSets($sets);
-    ```
-
-1. Retrieve a fetch set using the `fetch` method:
-
-    ```
-    $result = $parties->fetch('start', 0, 1, 'person_details');
-    foreach ($result->rows as $row)
+    String[] columns =
     {
-        $first = $row['NamFirst'];
-        $last = $row['NamLast'];
+        "NamFirst",
+        "NamLast",
+        "NamRoles_tab"
+    };
+    parties.AddFetchSet('person_details', $columns);
+    ```
 
-        $roles = $row['NamRoles_tab'];
-        foreach ($roles as $role)
+    VB
+    ```
+    // TODO
+    ```
+
+1. Add multiple fetch sets using the `AddFetchSets` method:
+
+    C#
+    ```
+    IMu.Map sets = new IMu.Map();
+    sets.Add("person_details",
+        new String[]{ "NamFirst", "NamLast", "NamRoles_tab" });
+    sets.Add("organisation_details",
+        new String[]{ "NamOrganisation", "NamOrganisationAcronym" });
+    parties.AddFetchSets(sets);
+    ```
+
+    VB
+    ```
+    // TODO
+    ```
+
+1. Retrieve a fetch set using the `Fetch` method:
+
+    C#
+    ```
+    ModuleFetchResult result = parties.Fetch(Sstart", 0, 1, "person_details");
+    foreach (IMu.Map row in result.Rows)
+    {
+        String first = row.GetString("NamFirst");
+        String last = row.GetString("NamLast");
+
+        String[] roles = row.GetStrings("NamRoles_tab");
+        foreach (String role in roles)
         {
             // ⋯
         }
     }
     ```
 
+    VB
+    ```
+    // TODO
+    ```
+
     > **WARNING:**
     >
-    >The fetch set name must be the **only** value passed as the `fetch` method *columns* argument. This may be revised in a future version of the IMu API.
+    >The fetch set name must be the **only** value passed as the `Fetch` method *columns* argument. This may be revised in a future version of the IMu API.
 
 #### Renaming columns
 
@@ -1186,17 +1654,23 @@ first_name=NamFirst
 
 The value of the specified column is now returned using the alternative name:
 
+C#
 ```
-$columns = array
-(
-    'first_name=NamFirst'
-);
-$result = $parties->fetch('start', 0, 1, $columns);
-foreach ($result->rows as $row)
+String[] columns =
 {
-    $first = $row['first_name'];
-    # ⋯
+    "first_name=NamFirst"
+};
+ModuleFetchResult result = parties.Fetch("start", 0, 1, $columns);
+foreach (IMu.Map row in result.Rows)
+{
+    String first = row.GetString"first_name");
+    // ⋯
 }
+```
+
+VB
+```
+// TODO
 ```
 
 Alternative names can be supplied to other column specifications as well:
@@ -1225,96 +1699,81 @@ contributors=[contributor=NarContributorRef_tab.SummaryData,role=NarContributorR
 
 Alternative names can also be supplied in fetch sets:
 
+C#
 ```
-$columns = array
-(
-    'first_name=NamFirst',
-    'last_name=NamLast',
-    'roles=NamRoles_tab'
-);
-$parties->addFetchSet('person_details', $columns);
+String[] columns =
+{
+    "first_name=NamFirst",
+    "last_name=NamLast",
+    "roles=NamRoles_tab"
+};
+parties.AddFetchSet("person_details", columns);
+```
+
+VB
+```
+// TODO
 ```
 
 ### 3.3.3) Example
 
-In this example we build a simple PHP based web page to search the Parties module by last name and display the full set of results.
-
-First build the search page, which is a plain HTML form:
+In this example we build a simple .Net based web page to search the Parties module by last name and display the full set of results.
 
 ```
-<head>
-  <title>Party Search</title>
-</head>
-<body>
-  <form action="a-simple-example.php">
-    <p>Enter a last name to search for (e.g. Smith):</p>
-    <input type="text" name="name"/>
-    <input type="submit" value="Search"/>
-  </form>
-</body>
-```
+using System;
+using IMu;
 
-Next build the results page, which runs the search and displays the results:
-
-```
-<?php
-require_once dirname(__FILE__) . '/../../lib/IMu.php';
-require_once IMu::$lib . '/Module.php';
-require_once IMu::$lib . '/Session.php';
-require_once IMu::$lib . '/Terms.php';
-
-if (! isset($_GET['name']) || $_GET['name'] == '')
+namespace a_simple_example
 {
-	header('HTTP/1.1 400 Bad Request');
-	print("missing 'name' parameter\r\n");
-	exit(1);
-}
-$name = $_GET['name'];
-
-$terms = new IMuTerms();
-$terms->add('NamLast', $name);
-
-$session = new IMuSession('imu.mel.kesoftware.com', 40136);
-$module = new IMuModule('eparties', $session);
-$hits = $module->findTerms($terms);
-
-$columns = array
-(
-	'NamFirst',
-	'NamLast'
-);
-$results = $module->fetch('start', 0, -1, $columns);
-?>
-<!DOCTYPE html>
-<html>
-<head>
-<title>IMu PHP API - A Simple Example</title>
-</head>
-<body>
-<p>Number of matches: <?php echo $results->hits ?></p>
-<table>
-<?php
-    /* Display each match in a separate row in a table */
-    foreach ($results->rows as $row)
+    class Program
     {
-?>
-    <tr>
-        <td><?php echo $row['rownum'] ?></td>
-        <td><?php echo $row['NamFirst'], ' ', $row['NamLast'] ?></td>
-    </tr>
-<?php
+        static void Main(string[] args)
+        {
+            string host = "oxford.man.kesoftware.com";//"imu.mel.kesoftware.com";
+            int port = 40136;
+
+            Session session = new Session(host, port);
+			// start-example
+            Module parties = new Module("eparties", session);
+
+            Terms terms = new Terms();
+            terms.Add("NamLast", "Smith");
+            long hits = parties.FindTerms(terms);
+
+            String[] columns =
+            {
+                "NamFirst",
+                "NamLast"
+            };
+            ModuleFetchResult result = parties.Fetch("start", 0, 2, columns);
+			// end-example
+            int count = result.Count;
+            IMu.Map[] rows = result.Rows;
+
+            Console.WriteLine("Count: {0}", count);
+            Console.WriteLine("Hits: {0}", hits);
+            Console.WriteLine("Rows:");
+            foreach (IMu.Map row in rows)
+            {
+                int rowNum = row.GetInt("rownum");
+                long irn = row.GetLong("irn");
+                String firstName = row.GetString("NamFirst");
+                String lastName = row.GetString("NamLast");
+                Console.WriteLine(" {0}. {1}, {2} ({3})",
+                    rowNum, lastName, firstName, irn);
+            }
+            Console.WriteLine("Press any key to finish...");
+            Console.ReadKey();
+        }
     }
-?>
-</table>
-</body>
-</html>
+}
 ```
 
 In this example the *name* parameter entered via the HTML search page is submitted to the PHP script. The script searches for parties records that have the entered value as a last name and display the parties first and last names in an HTML table.
 
 ## 3.4) Multimedia
 
-The IMu API provides a number of special mechanisms to handle access to the multimedia stored in the EMu DBMS. These machanisms fall into three rough categories:
+The IMu API provides a number of special mechanisms to handle access to the multimedia stored in the EMu <abbr title="Database management system">DBMS</abbr>. These machanisms fall into three rough categories:
 
 1. Mechanisms to select Multimedia module records that are attached to another module. This is covered in the [Multimedia Attachments](#3.4.1\)-multimedia-attachments) section.
 1. Mechanisms to select multimedia files from a Multimedia module record. This is covered in the [Multimedia Files](#3.4.2\)-multimedia-files) and [Filters](####-3.4.3\)-filters) sections.
@@ -1328,22 +1787,22 @@ It is important to note that a single record in the EMu DBMS can have multiple M
 
 ### 3.4.1) Multimedia Attachments
 
-Information about the multimedia attached to an EMu record from any module (**except** the Multimedia module itself) can be retrieved using the `IMuModule` class `fetch` method by specifying one of the following [virtual columns](#virtual-columns).
+Information about the multimedia attached to an EMu record from any module (**except** the Multimedia module itself) can be retrieved using the `Module` class `Fetch` method by specifying one of the following [virtual columns](#virtual-columns).
 
 The following virtual columns return information about a single multimedia attachment of the current record. The information is returned as a associative array:
 
-* application
-* audio
-* image
-* video
+* *application*
+* *audio*
+* *image*
+* *video*
 
 The following virtual columns return information about a set of multimedia attachments of the current record. The information is returned as an array. Each array member is an associative array containing the information for a single multimedia attachment from the set:
 
-* applications
-* audios
-* images
-* multimedia
-* videos
+* *applications*
+* *audios*
+* *images*
+* *multimedia*
+* *videos*
 
 All of these virtual columns return the [irn](GLOSSARY.md###-IRN), [type](GLOSSARY.md###-MIME-type) and [format](GLOSSARY.md###-MIME-format) of the Multimedia record attached to the current record. They also act as reference columns to the Multimedia module. This means that other columns from the Multimedia module (including [virtual columns](#virtual-columns)) can also be requested from the corresponding Multimedia record, for example:
 
@@ -1381,24 +1840,31 @@ All of these virtual columns return the [irn](GLOSSARY.md###-IRN), [type](GLOSSA
 
 This example shows the retrieval of the base information and the title for all multimedia images attached to a parties record:
 
+C#
 ```
-$columns = array
-(
-    'images.MulTitle'
-);
-$result = $parties->fetch('start', 0, 1, $columns);
-foreach ($result->rows as $row)
+String[] columns = 
 {
-    foreach ($row['images'] as $image)
+    "images.MulTitle"
+};
+ModuleFetchResult result = parties.Fetch("start", 0, 1, columns);
+foreach (IMu.Map row in result.Rows)
+{
+    foreach (IMu.Map image in row.GetMaps("images"))
     {
-        $irn = $image['irn'];
-        $type = $image['type'];
-        $format = $image['format'];
-        $title = $image['MulTitle'];
+        int irn = image.GetInt("irn");
+        String type = image.GetString("type");
+        String format = image.GetString("format");
+        String title = image.GetString("MulTitle");
 
-        printf("irn %d: %s - %s/%s\n", $irn, $title, $type, $format);
+        Console.WriteLine("irn {0}: {1} - {2}/{3}",
+            irn, title, type, format);
     }
 }
+```
+
+VB
+```
+// TODO
 ```
 
 This will produce output similar to the following:
@@ -1413,63 +1879,63 @@ irn 100102: Luciano Pavarotti with the Spice Girls - image/gif
 
 ### 3.4.2) Multimedia Files
 
-Similarly, information about the multimedia files associated with a Multimedia module record can be retrieved using the `IMuModule` class `fetch` method by specifying one of the following [virtual columns](#virtual-columns).
+Similarly, information about the multimedia files associated with a Multimedia module record can be retrieved using the `Module` class `Fetch` method by specifying one of the following [virtual columns](#virtual-columns).
 
 The following virtual columns return information about a single multimedia file from the current Multimedia record. The information is returned as a associative array.
 
-* master
-* resource
-* thumbnail
+* *master*
+* *resource*
+* *thumbnail*
 
 The following virtual columns return information about a set of multimedia files of the current Multimedia record. The information is returned as an array. Each array member is a associative array containing the information for a single multimedia file from the set:
 
-* resolutions
-* resources
-* supplementary
+* *resolutions*
+* *resources*
+* *supplementary*
 
 The master, thumbnail, resolutions and supplementary virtual columns all return the same type of information. That information differs for image and non-image multimedia as follows:
 
 For non-image multimedia they return:
 
-* fileSize
+* *fileSize*
 
     The size of the file in bytes.
 
-* identifier
+* *identifier*
 
     The name of the multimedia file.
 
-* index
+* *index*
 
     An integer that specifies the multimedia files position in the list of the master, thumbnail, resolutions and supplementary (in that order) multimedia files numbered from 0.
 
-* kind
+* *kind*
 
-    The kind (master, thumbnail, resolution, or supplementary) of the multimedia.
+    The kind (`master`, `thumbnail`, `resolution`, or `supplementary`) of the multimedia.
 
-* md5Checksum
+* *md5Checksum*
 
     The [MD5](http://en.wikipedia.org/wiki/MD5) checksum of the multimedia file.
 
-* md5Sum
+* *md5Sum*
 
-    The same as md5Checksum (included for backwards compatibility).
+    The same as *md5Checksum* (included for backwards compatibility).
 
-* mimeFormat
+* *mimeFormat*
 
     The media format.
 
-* mimeType
+* *mimeType*
 
     The media type.
 
-* size
+* *size*
 
-    The same as fileSize (included for backwards compatibility).
+    The same as *fileSize* (included for backwards compatibility).
 
 For image multimedia they return all of the values specified for non-image multimedia and also include:
 
-* bitsPerPixel
+* *bitsPerPixel*
 
     The colour depth of the image.
 
@@ -1489,88 +1955,88 @@ For image multimedia they return all of the values specified for non-image multi
 
     The type classification of the image. For example:
 
-    * Bilevel: Specifies a monochrome image.
+    * *Bilevel*: Specifies a monochrome image.
     
-    * ColorSeparation: Specifies a grayscale image.
+    * *ColorSeparation*: Specifies a grayscale image.
 
-    * Grayscale: Specifies a grayscale image.
+    * *Grayscale*: Specifies a grayscale image.
 
-    * GrayscaleMatte: Specifies a grayscale image with opacity.
+    * *GrayscaleMatte*: Specifies a grayscale image with opacity.
 
-    * Palette: Specifies a indexed color (palette) image.
+    * *Palette*: Specifies a indexed color (palette) image.
 
-    * PaletteMatte: Specifies a idexed color (palette) image with opacity.
+    * *PaletteMatte*: Specifies a idexed color (palette) image with opacity.
 
-    * TrueColor: Specifies a truecolor image.
+    * *TrueColor*: Specifies a truecolor image.
 
-    * TrueColorMatte: Specifies a truecolor image with opacity.
+    * *TrueColorMatte*: Specifies a truecolor image with opacity.
 
     Some more information can be found [here](http://www.imagemagick.org/Magick++/Enumerations.html#ImageType)
 
-* numberColours
+* *numberColours*
 
     The number of colours in the image.
 
-* numberPages
+* *numberPages*
 
     The number of images within the main image - a feature that is supported only in certain file types, e.g. TIFF.
 
-* planes
+* *planes*
 
     The number of planes in an image.
 
-* quality
+* *quality*
 
     An integer value from 1 to 100 that indicates the quality of the image. A lower value indicates a lower image quality and higher compression and a higher value indicates a higher image quality but a lower compression. Only applicable to JPEG and MPEG image formats.
 
-* resolution
+* *resolution*
 
-    The resolution of the image in PPI.
+    The resolution of the image in <abbr title="Pixels per inch">PPI</abbr>.
 
-* width
+* *width*
 
     The width of the image in pixels.
 
 The resource and resources virtual columns both return the same type of information as follows:
 
-* identifier
+* *identifier*
 
     The name of the multimedia file.
 
-* mimeType
+* *mimeType*
 
     The media type.
 
-* mimeFormat
+* *mimeFormat*
 
     The media format.
 
-* size
+* *size*
 
     The size of the file in bytes.
 
-* file
+* *file*
 
-    A [file handle](http://php.net/manual/en/function.tmpfile.php). This provides a read-only handle to a temporary copy of the multimedia file. The temporary copy of the file is discarded when the handle is closed or destroyed.
+    A [File Stream](https://docs.microsoft.com/en-us/dotnet/api/system.io.filestream). This provides a read-only handle to a temporary copy of the multimedia file. The temporary copy of the file is discarded when the handle is closed or destroyed.
 
-> **NOTE:**
->
-> If the resource column is specified with a filter, a modifier must also be provided in order for the file handle to be returned, eg:
->
-> ```
-> 'resources(height @ 200){resource:include}'
-> ```
-> 
-> Modifier options include:
->
-> 1. resource:include - (will add the file handle to the data set returned)
-> 1. resource:only - (will replace the data set returned with the file handle)
+    > **NOTE:**
+    >
+    > If the resource column is specified with a filter, a modifier must also be provided in order for the file handle to be returned, eg:
+    >
+    > ```
+    > 'resources(height @ 200){resource:include}'
+    > ```
+    > 
+    > Modifier options include:
+    >
+    > 1. resource:include - (will add the file handle to the data set returned)
+    > 1. resource:only - (will replace the data set returned with the file handle)
 
-* height
+* *height*
 
     The height of the image in pixels.
 
-* width
+* *width*
 
     The width of the image in pixels.
 
@@ -1578,38 +2044,44 @@ The resource and resources virtual columns both return the same type of informat
 
 This example shows the retrieval of the multimedia title and resource information about all multimedia files for all multimedia images attached to a parties record:
 
+C#
 ```
-$columns = array
-(
-    'images.(MulTitle,resources)',
-);
-$result = $parties->fetch('start', 0, 1, $columns);
-foreach ($result->rows as $row)
+String[] columns = 
 {
-    foreach ($row['images'] as $image)
+    "images.(MulTitle, resources)"
+};
+ModuleFetchResult result = parties.Fetch("start", 0, 1, columns);
+foreach (IMu.Map row in result.Rows)
+{
+    foreach (IMu.Map image in row.GetMaps("images"))
     {
-        $irn = $image['irn'];
-        $type = $image['type'];
-        $format = $image['format'];
-        $title = $image['MulTitle'];
+        int irn = image.GetInt("irn");
+        String type = image.GetString("type");
+        String format = image.GetString("format");
+        String title = image.GetString("MulTitle");
 
-        printf("irn %d: %s - %s/%s\n", $irn, $title, $type, $format);
-
-        foreach ($image['resources'] as $resource)
+        Console.WriteLine("irn {0}: {1} - {2}/{3}",
+            irn, title, type, format);
+        foreach (IMu.Map resource in image.GetMaps("resources"))
         {
-            $height = $resource['height'];
-            $identifier = $resource['identifier'];
-            $mimeFormat = $resource['mimeFormat'];
-            $mimeType = $resource['mimeType'];
-            $size = $resource['size'];
-            $width = $resource['width'];
+            int height = resource.GetInt("height");
+            String identifier = resource.GetString("identifier");
+            String mimeFormat = resource.GetString("mimeFormat");
+            String mimeType = resource.GetString("mimeType");
+            int size = resource.GetInt("size");
+            int width = resource.GetInt("width");
 
-            printf("  %s: %s/%s - %dx%d - %d bytes\n", $identifier, $mimeType,
-                $mimeFormat, $height, $width, $size);
+            Console.WriteLine("  {0}: {1}/{2} - {3}x{4} - {5} bytes",
+                identifier, mimeType, mimeFormat, height, width, size);
         }
-        print("\n");
+        Console.WriteLine();
     }
 }
+```
+
+VB
+```
+// TODO
 ```
 
 This will produce output similar to the following:
@@ -1641,30 +2113,38 @@ irn 100102: Luciano Pavarotti with the Spice Girls - image/gif
 ```
 The actual bytes of the multimedia file can be accessed using the file handle from the file value returned using the resource or resources virtual columns. We can use the file handle to copy the file from the IMu server:
 
+C#
 ```
-$columns = array
-(
-    'image.resource',
-);
-$result = $parties->fetch('start', 0, 1, $columns);
-foreach ($result->rows as $row)
+String[] columns = 
 {
-    $image = $row['image'];
-    $resource = $image['resource'];
+    "image.resource{resource:inclue}"
+};
+ModuleFetchResult result = parties.Fetch("start", 0, 1, columns);
+foreach (IMu.Map row in result.Rows)
+{
+    IMu.Map image = row.GetMap("image");
+    IMu.Map resource = image.GetMap("resource");
+    
+    String name = resource.GetString("identifier");
+    FileStream temp = (FileStream) resource["file"];
 
-    $name = $resource['identifier'];
-    $temp = $resource['file'];
+    FileStream copy = new FileStream(name, FileMode.OpenOrCreate,
+        FileAccess.Write);
+    byte[] buffer = new byte[4096]; // 4k buffer
+    int length = 0;
 
-    $copy = fopen($name, 'wb');
-    while (1)
+    while ((length = temp.Read(buffer, 0, 4096)) > 0)
     {
-        $data = fread($temp, 4096); // read 4K at a time
-        if ($data === false || strlen($data) == 0)
-            break;
-        fwrite($copy, $data);
+        copy.Write(buffer, 0, length);
     }
-    fclose($copy);
+    copy.Close();
+    temp.Close();
 }
+```
+
+VB
+```
+// TODO
 ```
 
 This copies the multimedia file from the IMu server to a local file with the same name, in this case *signature.jpg*
@@ -1685,41 +2165,41 @@ Multiple values can be specified by separating each filter with a comma:
 column(name operator value, name operator value);
 ```
 
-* name
+* **name**
 
     The filter name specifies the characteristic of the multimedia file to filter on. Unless noted otherwise the meaning of the filter names is as specified in [Multimedia Files](#3.4.2\)-multimedia-files) section.
 
     The following filter names can be used to filter any multimedia file:
 
-    * fileSize (or size)
-    * height
-    * identifier
-    * index
-    * kind
-    * mimeFormat (or format)
-    * mimeType (or type)
-    * width
+    * *fileSize* (or size)
+    * *height*
+    * *identifier*
+    * *index*
+    * *kind*
+    * *mimeFormat* (or format)
+    * *mimeType* (or type)
+    * *width*
 
     The following filter names can be used to filter multimedia image files:
 
-    * bitsPerPixel
-    * colourSpace
-    * compression
-    * imageType
-    * md5Checksum (or md5sum)
-    * numberColours
-    * numberPages
-    * planes
-    * quality
-    * resolution
+    * *bitsPerPixel*
+    * *colourSpace*
+    * *compression*
+    * *imageType*
+    * *md5Checksum* (or md5sum)
+    * *numberColours*
+    * *numberPages*
+    * *planes*
+    * *quality*
+    * *resolution*
 
     The following filter name can be used to filter supplementary multimedia files:
 
-    * usage
+    * *usage*
 
         The value of the supplementary attributes usage (SupUsage_tab) column.
 
-* operator
+* **operator**
 
     The operator specifies how the filter value should relate to the multimedia file characteristic specified by the filter *name*. The available values are:
 
@@ -1805,38 +2285,45 @@ resources(width @ 600, height @ 600)
 
 This example shows the retrieval of the multimedia title and resource information about the single multimedia file with a width closest to 300 for all multimedia images attached to a parties record:
 
+C#
 ```
-$columns = array
-(
-    'images.(MulTitle,resources(width @ 300))',
-);
-$result = $parties->fetch('start', 0, 1, $columns);
-foreach ($result->rows as $row)
+String[] columns =
 {
-    foreach ($row['images'] as $image)
+    "images.(MulTitle, resources(width @ 300))"
+};
+ModuleFetchResult result = parties.Fetch("start", 0, 1, columns);
+foreach (IMu.Map row in result.Rows)
+{
+    foreach (IMu.Map image in row.GetMaps("images"))
     {
-        $irn = $image['irn'];
-        $type = $image['type'];
-        $format = $image['format'];
-        $title = $image['MulTitle'];
+        int irn = image.GetInt("irn");
+        String type = image.GetString("type");
+        String format = image.GetString("format");
+        String title = image.GetString("MulTitle");
 
-        printf("irn %d: %s - %s/%s\n", $irn, $title, $type, $format);
+        Console.WriteLine("irn {0}: {1} - {2}/{3}",
+            irn, title, type, format);
 
-        foreach ($image['resources'] as $resource)
+        foreach (IMu.Map resource in image.GetMaps("resources"))
         {
-            $height = $resource['height'];
-            $identifier = $resource['identifier'];
-            $mimeFormat = $resource['mimeFormat'];
-            $mimeType = $resource['mimeType'];
-            $size = $resource['size'];
-            $width = $resource['width'];
+            long height = resource.GetInt("height");
+            String identifier = resource.GetString("identifier");
+            String mimeFormat = resource.GetString("mimeFormat");
+            String mimeType = resource.GetString("mimeType");
+            long size = resource.GetInt("size");
+            long width = resource.GetInt("width");
 
-            printf("  %s: %s/%s - %dx%d - %d bytes\n", $identifier, $mimeType,
-                $mimeFormat, $height, $width, $size);
+            Console.WriteLine("  {0}: {1}/{2} - {3}x{4} - {5} bytes",
+                identifier, mimeType, mimeFormat, height, width, size);
         }
-        print("\n");
+        Console.WriteLine();
     }
 }
+```
+
+VB
+```
+// TODO
 ```
 
 > **NOTE:**
@@ -1880,57 +2367,57 @@ column(…){name:value}
 
 The supported values for name are:
 
-* checksum
+* *checksum*
 
     Include a checksum value with the resource (or resources) virtual column response. While this does not actually apply any modifications to a multimedia file it is useful when you require a checksum for multimedia that has had a modifier applied to it (cf. original multimedia).
 
     The allowed value parts are:
 
-    * crc32
+    * *crc32*
 
     Include a [CRC32](http://en.wikipedia.org/wiki/Cyclic_redundancy_check) checksum.
 
-    * md5
+    * *md5*
 
     Include a [MD5](http://en.wikipedia.org/wiki/Md5) checksum.
 
     When the checksum modifier is used the resource (or resources) virtual column response includes a checksum component.
 
-* format
+* *format*
 
     Specifies that the multimedia file should be converted to the specified [format](GLOSSARY.md###-MIME-format). If the multimedia is not already in the required format it is reformatted on-the-fly.
 
     The IMu server uses ImageMagick to process the image and the range of supported formats is very large. The complete list is available from: http://www.imagemagick.org/script/formats.phpicon-external-link. Any of the supported formats can be used as the value part of this modifier.
 
-* resource
+* *resource*
 
     Specifies that a multimedia file handle should be returned.
 
     The allowed value parts are:
 
-    * include
-    * only
+    * `include`
+    * `only`
 
-* height
+* *height*
 
     Specifies that the multimedia image file should be converted to the specified height (in pixels). If the Multimedia record contains a resolution with this height, this resolution is returned instead (i.e. no modification is applied). Otherwise the closest matching larger resolution is resized to the requested height on-the-fly.
 
     The allowed *value* parts are any numeric value specifying the height in pixels.
 
-* width
+* *width*
 
     Specifies that the multimedia image file should be converted to the specified width (in pixels). If the Multimedia record contains a resolution with this width, this resolution is returned instead (i.e. no modification is applied). Otherwise the closest matching larger resolution is resized to the requested width on-the-fly.
 
     The allowed *value* parts are any numeric value specifying the width in pixels.
 
-* aspectratio
+* *aspectratio*
 
     Controls whether the image’s aspect ratio should be maintained when both a height and a width modifier are specified. If set to no, the aspect ratio is not maintained. by default the aspect ratio is maintained.
 
     The allowed value parts are:
 
-    * yes
-    * no
+    * `yes`
+    * `no`
 
 > **NOTE:**
 >
@@ -2012,34 +2499,46 @@ resource{height:300, width:300}
 
 This example shows the retrieval of the multimedia title and setting a *format*, *width* & *height* modifier to the resource information for the master multimedia image attached to a narratives record:
 
+C#
 ```
-$columns = array
-(
-    'image.(MulTitle, resource{format:jpeg, height:600, width:600, checksum:md5})',
-);
-$result = $narratives->fetch('start', 0, 1, $columns);
-foreach ($result->rows as $row)
+Terms terms = new Terms();
+terms.Add("NarTitle", "Angus Young");
+
+long hits = narratives.FindTerms(terms);
+
+String[] columns =
 {
-    $image = $row['image'];
-    $irn = $image['irn'];
-    $type = $image['type'];
-    $format = $image['format'];
-    $title = $image['MulTitle'];
+    "image.(MulTitle, resource{format:jpeg, height:600, width:600, checksum:md5})"
+};
+ModuleFetchResult result = narratives.Fetch("start", 0, 1, columns);
 
-    printf("irn %d: %s - %s/%s\n", $irn, $title, $type, $format);
+foreach (IMu.Map row in result.Rows)
+{
+    IMu.Map image = row.GetMap("image");
+    int irn = image.GetInt("irn");
+    String type = image.GetString("type");
+    String format = image.GetString("format");
+    String title = image.GetString("MulTitle");
 
-    $resource = $image['resource'];
-    $height = $resource['height'];
-    $identifier = $resource['identifier'];
-    $mimeFormat = $resource['mimeFormat'];
-    $mimeType = $resource['mimeType'];
-    $size = $resource['size'];
-    $width = $resource['width'];
-    $checksum = $resource['checksum'];
+    Console.WriteLine("irn {0}: {1} - {2}/{3}",
+        irn, title, type, format);
 
-    printf("  %s: %s/%s - %dx%d - %d bytes - %s\n", $identifier, $mimeType,
-        $mimeFormat, $height, $width, $size, $checksum);
+    IMu.Map resource = image.GetMap("resource");
+    long height = resource.GetInt("height");
+    String identifier = resource.GetString("identifier");
+    String mimeFormat = resource.GetString("mimeFormat");
+    String mimeType = resource.GetString("mimeType");
+    long size = resource.GetInt("size");
+    long width = resource.GetInt("width");
+
+    Console.WriteLine("  {0}: {1}/{2} - {3}x{4} - {5} bytes",
+        identifier, mimeType, mimeFormat, height, width, size);               
 }
+```
+
+VB
+```
+// TODO
 ```
 
 This will produce output similar to the following:
@@ -2065,43 +2564,55 @@ This is simple in a conventional application where a connection to the separate 
 
 The IMu server provides a solution to this. When a handler object is created, a corresponding object is created on the server to service the handler’s request: this server-side object is allocated a unique identifier by the IMu server. When making a request for more information, the unique identifier can be used to connect a new handler to the same server-side object, with its state intact.
 
-The following example illustrates the connection of a second, independently created `IMuModule` object to the same server-side object:
+The following example illustrates the connection of a second, independently created `Module` object to the same server-side object:
 
+C#
 ```
 // Create a module object as usual
-$first = new IMuModule('eparties', $session);
+Module first = new Module("eparties", session);
 
 // Run a search - this will create a server-side object
-$keys = array(1, 2, 3, 4, 5, 42);
-$first->findKeys($keys);
+int[] keys = { 1, 2, 3, 4, 5, 42 };
+first.FindKeys(keys);
 
 // Get a set of results
-$result1 = $first->fetch('start', 0, 2, 'SummaryData');
+ModuleFetchResult result1 = first.Fetch("start", 0, 2, "SummaryData");
 
 // Create a second module object
-$second = new IMuModule('eparties', $session);
+Module second = new Module("eparties", session);
 
 /*
  * Attach it to the same server-side object as the first module. This is
  * the key step.
  */
-$second->id = $first->id;
+second.ID = first.ID;
 
 // Get a second set of results from the same search
-$result2 = $second->fetch('current', 1, 2, 'SummaryData');
+ModuleFetchResult result2 = second.Fetch("current", 1, 2, "SummaryData");
 ```
 
-Although two completely separate `IMuModule` objects have been created, they are each connected to the same server-side object by virtue of having the same `id` property. This means that the second `fetch` call will access the same result set as the first `fetch`. Notice that a flag of *current* has been passed to the second call. The current state is maintained on the server-side object, so in this case the second call to `fetch` will return the third and fourth records in the result set.
-
-While this example illustrates the use of the id property, it is not particularly realistic as it is unlikely that two distinct objects which refer to the same server-side object would be required in the same piece of code. The need to re-connect to the same server-side object when generating another page of results is far more likely. This situation involves creating a server-side `IMuModule` object (to search the module and deliver the first set of results) in one request and then re-connecting to the same server-side object (to fetch a second set of results) in a second request. As before, this is achieved by assigning the same identifier to the `id` property of the object in the second page, but two other things need to be considered.
-
-By default the IMu server destroys all server-side objects when a session finishes. This means that unless the server is explicitly instructed not to do so, the server-side object may be destroyed when the connection from the first page is closed. Telling the server to maintain the server-side object only requires that the destroy property on the object is set to false before calling any of its methods. In the example above, the server would be instructed not to destroy the object as follows:
-
+VB
 ```
-$module = new IMuModule('eparties', $session);
-$module->setDestroy(false);
-$keys = array(1, 2, 3, 4, 5, 42);
-$module->findKeys($keys);
+// TODO
+```
+
+Although two completely separate `Module` objects have been created, they are each connected to the same server-side object by virtue of having the same `ID` property. This means that the second `Fetch` call will access the same result set as the first `Fetch`. Notice that a flag of *current* has been passed to the second call. The current state is maintained on the server-side object, so in this case the second call to `Fetch` will return the third and fourth records in the result set.
+
+While this example illustrates the use of the `ID` property, it is not particularly realistic as it is unlikely that two distinct objects which refer to the same server-side object would be required in the same piece of code. The need to re-connect to the same server-side object when generating another page of results is far more likely. This situation involves creating a server-side `Module` object (to search the module and deliver the first set of results) in one request and then re-connecting to the same server-side object (to fetch a second set of results) in a second request. As before, this is achieved by assigning the same identifier to the `ID` property of the object in the second page, but two other things need to be considered.
+
+By default the IMu server destroys all server-side objects when a session finishes. This means that unless the server is explicitly instructed not to do so, the server-side object may be destroyed when the connection from the first page is closed. Telling the server to maintain the server-side object only requires that the `Destroy` property on the object is set to false before calling any of its methods. In the example above, the server would be instructed not to destroy the object as follows:
+
+C#
+```
+Module module = new Module("eparties", session);
+module.SetDestroy(false);
+int[] keys = { 1, 2, 3, 4, 5, 42 };
+module.FindKeys(keys);
+```
+
+VB
+```
+// TODO
 ```
 
 The second point is quite subtle. When a connection is established to a server, it is necessary to specify the port to connect to. Depending on how the server has been configured, there may be more than one server process listening for connections on this port. Your program has no control over which of these processes will actually accept the connection and handle requests. Normally this makes no difference, but when trying to maintain state by re-connecting to a pre-existing server-side object, it is a problem.
@@ -2110,21 +2621,33 @@ For example, suppose there are three separate server processes listening for con
 
 The problem comes when the next page connects to the server again. When the connection is established any one of the three server processes may accept the connection. However, only the first process is maintaining the relevant server-side object. If the second or third process accepts the connection, the object will not be found.
 
-The solution to this problem is relatively straightforward. Before the first request closes the connection to its server, it must notify the server that subsequent requests need to connect explicitly to that process. This is achieved by setting the `IMuSession` object’s `suspend` property to *true* prior to submitting any request to the server:
+The solution to this problem is relatively straightforward. Before the first request closes the connection to its server, it must notify the server that subsequent requests need to connect explicitly to that process. This is achieved by setting the `Session` object’s `Suspend` property to *true* prior to submitting any request to the server:
 
+C#
 ```
-$session = new IMuSession('server.com', 12345);
-$module = new IMuModule('eparties', $session);
-$session->setSuspend(true);
-$module->findKeys($keys);
+Session session = new Session("server.com", 12345);
+Module module = new Module("eparties", session);
+session.SetSuspend(true);
+module.FindKeys(keys);
 ```
 
-The server handles a request to suspend a connection by starting to listen for connections on a second port. Unlike the primary port, this port is guaranteed to be used only by that particular server process. This means that a subsequent page can reconnect to a server on this second port and be guaranteed of connecting to the same server process. This in turn means that any saved server-side object will be accessible via its identifier. After the request has returned (in this example it was a call to `findKeys`), the `IMuSession` object’s `port` property holds the port number to reconnect to:
-
+VB
 ```
-$session->setSuspend(true);
-$module->findKeys($keys);
-$reconnect = $session->port;
+// TODO
+```
+
+The server handles a request to suspend a connection by starting to listen for connections on a second port. Unlike the primary port, this port is guaranteed to be used only by that particular server process. This means that a subsequent page can reconnect to a server on this second port and be guaranteed of connecting to the same server process. This in turn means that any saved server-side object will be accessible via its identifier. After the request has returned (in this example it was a call to `FindKeys`), the `Session` object’s `Port` property holds the port number to reconnect to:
+
+C#
+```
+session.SetSuspend(true);
+module.FindKeys(keys);
+int reconnect = session.Port;
+```
+
+VB
+```
+// TODO
 ```
 
 ## 4.1) Example
@@ -2132,198 +2655,103 @@ $reconnect = $session->port;
 
 To illustrate we’ll modify the very simple results page of the [earlier section](#-3.3.3\)-example) to display the list of matching names in blocks of five records per page. We’ll provide simple *Next* and *Prev* links to allow the user to move through the results, and we will use some more `GET` parameters to pass the port we want to reconnect to, the identifier of the server-side object and the rownum of the first record to be displayed.
 
-First build the search page, which is a plain HTML form:
-
-```
-<head>
-  <title>Party Search</title>
-</head>
-<body>
-  <form action="example.php">
-    <p>Enter a last name to search for (e.g. S*):</p>
-    <input type="text" name="name"/>
-    <input type="submit" value="Search"/>
-  </form>
-</body>
-```
-
-Next build the results page, which runs the search and displays the results. The steps to build the search page are outlined in detail below.
-
-1. Create an `IMuSession` object. Then the `port` property is set to a standard value unless a *port* parameter has been passed in the URL.
+1. 
+    Create a `Session` object with parameters `Host` and `Port`, then establish a connection and immediately set the `Suspend` property to true to tell the server that we may want to connect again:
 
     ```
-    /*
-    * Create new session object.
-    */
-    $session = new IMuSession();
-    $session->setHost('imu.mel.kesoftware.com');
-
-    /* 
-    * Work out what port to connect to
-    */
-    $port = 40136;
-    if (isset($_GET['port']))
-        $port = $_GET['port'];
-    $session->setPort($port);
-    ```
-
-1. Connect to the server and immediately set the suspend property to *true* to tell the server that we may want to connect again:
-
-    ```
-    /*
-    * Establish connection and tell the server we may want to re-connect
-    */
-    $session->connect();
-    $session->setSuspend(1);
+    Session session = new Session(Host, Port);
+    session.Connect();
+    session.Suspend = true;
     ```
 
     This ensures the server listens on a new, unique port.
-
-1. Create the client-side `IMuModule` object and set its destroy property to *false*:
+    
+1. 
+    Create the client-side `Module` object and set its destroy property to *false*:
 
     ```
-    /* 
-    * Create module object and tell the server not to destroy it.
-    */
-    $module = new IMuModule('eparties', $session);
-    $module->setDestroy(false);
+    Module parties = new Module("eparties", session);
+    parties.Destroy = false;
     ```
 
     This ensures that the server will not destroy the corresponding server-side object when the session ends.
 
-1. If the URL included a *name* parameter, we need to do a new search. Alternatively, if it included an *id* parameter, we need to connect to an existing server-side object:
+1. 
+    If we have search terms, we will perform a new search. If connecting to a new server-side module we record the current `Module` `ID` property, otherwise we set the `ID` property:
 
     ```
-    /* If name is supplied, do new search. The search term is passed from
-    ** search.html using GET
-    */
-    if (isset($_GET['name']))
-    {
-        $terms = new IMuTerms();
-        $terms->add('NamLast', $_GET['name']);
-        $module->findTerms($terms);
-    }
-    /* 
-    * Otherwise, if id is supplied reattach to existing server-side object
-    */
-    else if (isset($_GET['id']))
-    {
-        $module->id = $_GET['id'];
-    }
-    /*
-    * Otherwise, we can't process
-    */
+    parties.Destroy = false;
+
+    if (ID == null)
+        ID = parties.ID;
     else
+        parties.ID = ID;
+    ```
+
+1. 
+    Build a list of columns to fetch:
+
+    ```
+    static private String[] columns =
     {
-        header('HTTP/1.1 400 Bad Request');
-        print("missing 'name' or 'id' parameter\r\n");
-        exit(1);
-    }
+        "NamFirst",
+        "NamLast"
+    };
     ```
 
-1. Build a list of columns to fetch:
+1. 
+    If the URL included a *rownum* parameter, fetch records starting from there. Otherwise start from record number *1*:
 
     ```
-    $columns = array
-    (
-        'NamFirst',
-        'NamLast'
-    );
+    parties.ID = ID;
     ```
 
-1. If the URL included a *rownum* parameter, fetch records starting from there. Otherwise start from record number *1*:
+    After this, we display the results. For the sake of our console example, we manually disconnect from the server, as we do not need to ‘refresh’ like a web browser.
+
+
+1. 
+    Finally, we allow the user to move forwards and backwards through the results. To do this we need to pass on the information about our connection, current position and number of hits.
 
     ```
-    /*
-    * Work out which block of records to fetch
-    */
-    $rownum = 1;
-    if (isset($_GET['rownum']))
-        $rownum = $_GET['rownum'];
+    Map value = new Map();
+    value.Add("ID", parties.ID);
+    value.Add("Hits", results.Hits);
+    value.Add("rownum", rownum);
+    return value;
     ```
 
-1. Build the main page:
+    We then start a loop, prompting the user to move forward/backwards between results or to quit:
 
     ```
-    /*
-    * Fetch next five records
-    */
-    $results = $module->fetch('start', $rownum - 1, 5, $columns);
-    $hits = $results->hits;
+    input = Console.ReadKey();
+    if (input.Key == ConsoleKey.Q)
+        break;
 
-    /*
-    * Build the results page
-    */
-    ?>
-    <!DOCTYPE html>
-    <html>
-    <head>
-    <title>IMu PHP API - Maintaining State</title>
-    </head>
-    <body>
-    <p>Number of matches: <?php echo $hits ?></p>
-    <table>
-    <?php
-    // Display each match in a separate row in a table
-    foreach ($results->rows as $row)
+    if (input.Key == ConsoleKey.LeftArrow)
     {
-    ?>
-        <tr>
-            <td><?php echo $row['rownum'] ?></td>
-            <td><?php echo $row['NamFirst'], ' ', $row['NamLast'] ?></td>
-        </tr>
-    <?php
+        rownum -= count;
+        if (rownum < 1)
+            rownum = 1;
     }
-    ?>
-    </table>
-    <?php
+    else if (input.Key == ConsoleKey.RightArrow)
+    {
+        if (rownum + count < Hits)
+            rownum += count;
+    }
+    else
+        continue;
+
+    result = ServerRequest(ID, rownum);
+    rownum = result.GetInt("rownum");
+    Hits = result.GetLong("Hits");
+
     ```
-
-1. Finally, add the *Prev* and *Next* links to allow the user to page backwards and forwards through the results. This is the most complicated part! First, to ensure that a connection is made to the same server and server-side object, add the appropriate *port* and *id* parameters to the link URL:
-
-    ```
-    /*
-    * Add the Prev and Next links
-    */
-    $url = $_SERVER['PHP_SELF'];
-    $url .= '?port=' . $session->port;
-    $url .= '&id=' . $module->id;
-    ```
-
-1. If the first record is not showing add a Prev link to allow the user to go back one page in the result set. Similarly, if the last record is not showing add a *Next* link to allow the user to go forward one page:
-
-```
-$first = $results->rows[0];
-if ($first['rownum'] > 1)
-{
-    $prev = $first['rownum'] - 5;
-    if ($prev < 1)
-        $prev = 1;
-    $prev = $url . '&rownum=' . $prev;
-?>
-<a href="<?php echo $prev ?>">Prev</a>
-<?php
-}
-
-$last = $results->rows[count($results->rows) - 1];
-if ($last['rownum'] < $results->hits)
-{
-    $next = $last['rownum'] + 1;
-    $next = $url . '&rownum=' . $next;
-?>
-<a href="<?php echo $next ?>">Next</a>
-<?php
-}
-?>
-</body>
-</html>
-```
 
 # 5) Logging in to an IMu server
 
 When an IMu based program connects to an IMu server it is given a default level of access to EMu modules.
 
-It is possible for an IMu based program to override this level of access by explicitly logging in to the server as a registered user of EMu. This is done by using the `IMuSession‘s` `login` method. Once the `login` method has been called successfully the session remains authenticated until the `logout` method is called.
+It is possible for an IMu based program to override this level of access by explicitly logging in to the server as a registered user of EMu. This is done by using the `Session‘s` `login` method. Once the `login` method has been called successfully the session remains authenticated until the `logout` method is called.
 
 ## 5.1) The login method
 
@@ -2331,19 +2759,19 @@ The login method is used to authenticate the program as a registered user of EMu
 
 ### 5.1.1) Arguments
 
-* username
+* **username**
 
     The name of the user to login as. This must be the name of a registered EMu user on the system.
 
-* password
+* **password**
 
-    The user’s password. This argument is optional and if it is not supplied it defaults to null.
+    The user’s password. This argument is optional and if it is not supplied it defaults to `null`.
 
     > **NOTE:**
     >
     > Supplying a `null` password is uncommon but it is sometimes a valid thing to do. If the server receives a password of `null` it will try to authenticate the user using server-side methods such as verification against emu’s .rhosts file.
 
-* spawn
+* **spawn**
 
     A boolean value indicating whether the IMu server should create a separate process dedicated to handling this program’s requests. This argument is optional and if not supplied it defaults to `true`.
 
@@ -2361,7 +2789,7 @@ The logout method relinquishes access as the previously authenticated user.
 
 # 6) Updating an EMu Module
 
-The `IMuModule` class provides methods for inserting new records and for updating or removing existing records in any EMu module.
+The `Module` class provides methods for inserting new records and for updating or removing existing records in any EMu module.
 
 > **NOTE:**
 >
@@ -2369,19 +2797,19 @@ The `IMuModule` class provides methods for inserting new records and for updatin
 
 ## 6.1) The insert Method
 
-The `insert` method is used to add a new record to the module.
+The `Insert` method is used to add a new record to the module.
 
 ### 6.1.1) Arguments
 
 The method takes two arguments:
 
-* values
+* **values**
 
     The *values* argument specifes any data values to be inserted into the newly created record.
 
-    The data values should be an associative array. The indexes of the array must be column names.
+    The *values* should be an associative [Map](TODO-link-to-reference) object. The indexes of the `Map` must be column names.
 
-* columns
+* **columns**
 
     The *columns* argument is used to specify which columns should be returned once the record has been created. The value of the *column* is specified in exactly the same way as in the `fetch` method. See the section on [Specifying Columns](#3.3.2\)-Specifying-Columns) for details.
 
@@ -2391,62 +2819,68 @@ The method takes two arguments:
 
 ### 6.1.2) Return Value
 
-The method returns an associative array. This associative array contains an entry for each column requested. This is identical to the associative array returned for each row as part of the `fetch` method.
+The method returns a [Map](TODO-link-to-reference). This associative array contains an entry for each column requested.
 
 ### 6.1.3) Example
 
+C#
 ```
-$parties = new IMuModule('eparties', $session);
+Module parties = new Module("eparties", session);
 
 /* Specify the values to insert.
 */
-$values = array
-(
-    'NamFirst' => 'Chris',
-    'NamLast' => 'Froome',
-    'NamOtherNames_tab' => array
-    (
-        'Christopher',
-        'Froomey'
-    )
-);
+Map values = new Map();
+values.Add("NamFirst", "Chris");
+values.Add("NamLast", "Froome");
+String[] otherNames =
+{
+    "Christopher",
+    "Froomey",
+};
+values.Add("NamOtherNames_tab", otherNames);
 
 /* Specify the column values to return after inserting.
 */
-$columns = array
-(
-    'irn',
-    'NamFirst',
-    'NamLast',
-    'NamOtherNames_tab'
-);
+String[] columns =
+{
+    "irn",
+    "NamFirst",
+    "NamLast",
+    "NamOtherNames_tab"
+};
 
 /* Insert the new record.
 */
+Map result = null;
 try
 {
-    $result = $parties->insert($values, $columns);
+    result = parties.Insert(values, columns);
 }
-catch (Exception $e)
+catch (IMuException e)
 {
-    print("Error: $e\n");
-    exit(1);
+    Console.WriteLine("Error: {0}", e);
+    Environment.Exit(1);
 }
 
 /* Output the returned values.
 */
-$irn = $result['irn'];
-$first = $result['NamFirst'];
-$last = $result['NamLast'];
-$others = $result['NamOtherNames_tab'];
+int irn = result.GetInt("irn");
+String first = result.GetString("NamFirst");
+String last = result.GetString("NamLast");
+String[] others = result.GetStrings("NamOtherNames_tab");
 
-printf("%s, %s (%d)\n", $last, $first, $irn);
-print("Other names:\n");
-foreach ($others as $other)
+Console.WriteLine("{0}, {1} ({2})", last, first, irn);
+Console.WriteLine("Other names:");
+foreach (String other in others)
 {
-    print("\t$other\n");
+    Console.WriteLine("\t{0}", other);
 }
-exit(0);
+Environment.Exit(0);
+```
+
+VB
+```
+// TODO
 ```
 
 If inserting of records is permitted this will produce output similar to the following:
@@ -2466,92 +2900,101 @@ Error: ModuleUpdatesNotAllowed (authenticated,default) [500]
 
 ## 6.2) The update Method
 
-The `update` method is used to modify one or more existing records. This method operates very similarly to the `fetch` method. The only difference is a _values_ argument which contains a set of values to be applied to each specified record.
+The `Update` method is used to modify one or more existing records. This method operates very similarly to the `Fetch` method. The only difference is a *values* argument which contains a set of values to be applied to each specified record.
 
 ### 6.2.1) Arguments
 
 The method takes five arguments:
 
 * **flag**
+
 * **offset**
+
 * **count**
 
-    These arguments are identical to those used by the [fetch](#3.3.1\)-The-fetch-Method) method. They define the starting position and size of the block of records to be updated.
+    These arguments are identical to those used by the [Fetch](#3.3.1\)-The-fetch-Method) method. They define the starting position and size of the block of records to be updated.
 
 * **values**
 
-    The _values_ argument specifies the columns to be updated in the specified block of records. The _values_ argument must be a hash reference. The keys of the hash must be column names.
+    The *values* argument specifies the columns to be updated in the specified block of records. The *values* argument must be a [Map](TODO-link-to-reference). The keys of the `Map` object must be column names.
 
-    This is the same as the values argument for the [insert](#6.1\)-The-insert-Method) method.
+    This is the same as the values argument for the [Insert](#6.1\)-The-insert-Method) method.
 
 * **columns**
 
-    The _columns_ argument is used to specify which columns should be returned once the record has been created. The value of the _column_ is specified in exactly the same way as in the `fetch` method. See the section on [Specifying Columns](#3.3.2\)-Specifying-Columns) for details.
+    The *columns* argument is used to specify which columns should be returned once the record has been created. The value of the _column_ is specified in exactly the same way as in the `Fetch` method. See the section on [Specifying Columns](#3.3.2\)-Specifying-Columns) for details.
 
-    This is the same as the _columns_ argument for the `insert` method.
+    This is the same as the _columns_ argument for the `Insert` method.
 
 ### 6.2.2) Return Value
 
-The `update` method returns an `IMuModuleFetchResult` object (the same
-as the [fetch](#3.3.1\)-The-fetch-Method) method). It contains
+The `Update` method returns an `ModuleFetchResult` object (the same
+as the [Fetch](#3.3.1\)-The-fetch-Method) method). It contains
 the values for the selected block of records after the updates have been
 applied.
 
 ### 6.2.3) Example
 
+C#
 ```
-/* Find all parties records that have a first name of "Chris" and a last name
-** of "Froome".
+/* Find all parties records that have a first name of "Chris" and a
+** last name of "Froome".
 */
-$parties = new IMuModule('eparties', $session);
-$terms = new IMuTerms();
-$terms->add('NamFirst', 'Chris');
-$terms->add('NamLast', 'Froome');
-$parties->findTerms($terms);
+Module parties = new Module("eparties", session);
+Terms terms = new Terms();
+terms.Add("NamFirst", "Chris");
+terms.Add("NamLast", "Froome");
+parties.FindTerms(terms);
 
 /* Specify the column to update and the new value.
 */
-$values = array
-(
-    'NamFirst' => 'Christopher',
-);
+Map values = new Map();
+values.Add("NamFirst", "Christopher");
 
 /* Specify the column values to return after updating.
 */
-$columns = array
-(
-    'irn',
-    'NamFirst',
-    'NamLast'
-);
+String[] columns =
+{
+    "irn",
+    "NamFirst",
+    "NamLast"
+};
 
 /* Run the update.
 */
+ModuleFetchResult result = null;
 try
 {
-    $result = $parties->update('start', 0, -1, $values, $columns);
+    result = parties.Update("start", 0, -1, values, columns);
 }
-catch (Exception $e)
+catch (IMuException e)
 {
-    print("Error: $e\n");
-    exit(1);
+    Console.WriteLine("Error: {0}", e);
+    Environment.Exit(1);
 }
 
 /* Output the returned values.
 */
-print("Count: $result->count\n");
-print("Hits: $result->hits\n");
-print("Rows:\n");
-foreach ($result->rows as $row)
-{
-    $rowNum = $row['rownum'];
-    $irn = $row['irn'];
-    $first = $row['NamFirst'];
-    $last = $row['NamLast'];
+Console.WriteLine("Count: {0}", result.Count);
+Console.WriteLine("Hits: {0}", result.Hits);
 
-    printf("\t%d. %s, %s (%d)\n", $rowNum, $last, $first, $irn);
+Console.WriteLine("Rows:");
+foreach (IMu.Map row in result.Rows)
+{
+    int rowNum = row.GetInt("rownum");
+    int irn = row.GetInt("irn");
+    String first = row.GetString("NamFirst");
+    String last = row.GetString("NamLast");
+
+    Console.WriteLine("\t{0}. {1}, {2} ({3})", rowNum, last, first,
+        irn);
 }
-exit(0);
+Environment.Exit(0);
+```
+
+VB
+```
+// TODO
 ```
 
 If updating records is allowed the example will produce output similar to the following:
@@ -2565,33 +3008,58 @@ Rows:
 
 ## 6.3) The remove Method
 
-The `remove` method is used to remove one or more existing records.
+The `Remove` method is used to remove one or more existing records.
 
-## 6.3.1) Example
+### 6.3.1) Arguments
 
+The method takes three arguments:
+
+* **flag**
+* **offset**
+* **count**
+
+These arguments define the starting position and size of the block of records to be removed. They are identical to those used by the [Fetch](#3.3.1\)-The-fetch-Method) and [Update](#6.2\)-The-update-Method) methods.
+
+### 6.3.2) Return Value
+
+The method returns a `long` that specifies the number of records that were removed.
+
+
+### 6.3.3) Example
+
+C#
 ```
-/* Find all parties records that have a first name of "Christopher" and a last
-** name of "Froome".
+/* Find all parties records that have a first name of "Christopher" and
+** a last name of "Froome".
 */
-$parties = new IMuModule('eparties', $session);
-$terms = new IMuTerms();
-$terms->add('NamFirst', 'Christopher');
-$terms->add('NamLast', 'Froome');
-$parties->findTerms($terms);
+Module parties = new Module("eparties", session);
+Terms terms = new Terms();
+terms.Add("NamFirst", "Christopher");
+terms.Add("NamLast", "Froome");
+parties.FindTerms(terms);
 
 /* Remove all of the matching records.
 */
+long result = 0;
 try
 {
-    $result = $parties->remove('start', 0, -1);
+    result = parties.Remove("start", 0, -1);
 }
-catch (Exception $e)
+catch (IMuException e)
 {
-    print("Error: $e\n");
-    exit(1);
+    Console.WriteLine("Error: {0}", e);
+    Environment.Exit(1);
 }
-print("Removed $result record(s)\n");
-exit(0);
+
+/* Output the number of removed records.
+*/
+Console.WriteLine("Removed {0} record(s)", result);
+Environment.Exit(0);
+```
+
+VB
+```
+// TODO
 ```
 
 If removing records is allowed the example will produce output similar to the following:
@@ -2602,56 +3070,48 @@ Removed 1 record(s)
 
 # 7) Exceptions
 
-When an error occurs, the IMu PHP API throws an exception. The exception is an [IMuException](TODO-link-to-reference) object. This is a subclass of PHP‘s standard `Exception` class.
+When an error occurs, the IMu PHP API throws an exception. The exception is an [IMuException](TODO-link-to-reference) object. This is a subclass of .Net's standard `ApplicationException` class.
 
-For simple error handling all that is usually required is to catch the exception and report the exception as a string:
+The `IMuException` class overrides the `Exception` classes `ToString` method and returns an error message.
 
+To handle specific IMu errors it is necessary to check the exception is an `IMuException` object before using it. The `IMuException` class includes a property called `id`. This is a string and contains the internal IMu error code for the exception. For example, you may want to catch the exception raised when a `Session` objects `Connect` method fails and try to connect to an alternative server:
+
+C#
 ```
+String mainServer = "server1.com";
+String alternativeServer = "server2.com";
+Session session = new Session();
+session.Host = mainServer;
 try
 {
-    // ⋯
+    session.Connect();
 }
-catch (Exception $e)
-{
-    echo "Error: $e";
-    exit(1);
-}
-```
-
-The `IMuException` class overrides the `Exception` classes `__toString` method (which is called “magically” when the object is used as a string) and returns an error message.
-
-To handle specific IMu errors it is necessary to check the exception is an `IMuException` object before using it. The `IMuException` class includes a property called id. This is a string and contains the internal IMu error code for the exception. For example, you may want to catch the exception raised when an `IMuSession` objects `connect` method fails and try to connect to an alternative server:
-
-```
-$mainServer = 'server1.com';
-$alternativeServer = 'server2.com';
-$session = new IMuSession;
-$session->host = $mainServer;
-try
-{
-    $session->connect();
-}
-catch (IMuException $e)
+catch (IMuException e)
 {
     // Check for specific SessionConnect error
-    if ($e->id != 'SessionConnect')
+    if (e.ID != "SessionConnect")
     {
-        echo "Error: $e";
-        exit(1);
+        Console.WriteLine("Error: {0}", e);
+        return;
     }
-    $session->host = $alternativeServer;
+    session.Host = alternativeServer;
     try
     {
-        $session->connect();
+        session.Connect();
     }
-    catch (Exception $e)
+    catch (Exception e)
     {
-        echo "Error: $e";
-        exit(1);
+        Console.WriteLine("Error: {0}", e);
+        return;
     }
 }
 /*
  * By the time we get to here the session is connected to either the main
  * server or the alternative.
  */
+```
+
+VB
+```
+// TODO
 ```
