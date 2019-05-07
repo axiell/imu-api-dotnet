@@ -46,7 +46,7 @@ This documentation uses conventional types wherever possible. Using conventional
 
 # 1) Using The IMu API
 
-The IMu API source code bundle for version 2.0 (or higher) is required to develop an IMu-based application. This bundle contains all the classes that make up the IMu PHP API. IMu API bundles are available from the IMu [releases](https://emu.kesoftware.com/support/downloads/imu/releases) page.
+The IMu .Net API source code bundle for version 2.0 (or higher) is required to develop an IMu-based application. This bundle contains all the classes that make up the IMu .Net API. IMu API bundles are available from the IMu [releases](https://emu.kesoftware.com/support/downloads/imu/releases) page.
 
 As with all .Net assemblies, the IMu .Net assembly must be available so that the .Net compiler and runtime environment can find and use the IMu classes. Tools for .Net development, such as Microsoft’s Visual Studio, make it possible to add a reference to the IMu assembly to a project. All classes in the IMu .Net API are included in the one namespace, IMu. As is usual in .Net development, it is possible to refer to an IMu class in your code by either:
 
@@ -116,7 +116,7 @@ The IMu library includes a class called `IMu`. This class includes the static `s
 
 Many of the methods in the IMu library objects throw an exception when an error occurs. For this reason, code that uses IMu library objects should be surrounded with an `try/catch` block.
 
-The following code is a basic template for writing PHP programs that use the IMu library:
+The following code is a basic template for writing .Net programs that use the IMu library:
 
 C#
 ```
@@ -233,9 +233,9 @@ All handlers are subclasses of IMu’s `Handler` class.
 
 > **NOTE:**
 >
-> You do not typically create a IMuHandler object directly but instead use a subclass.
+> You do not typically create a Handler object directly but instead use a subclass.
 
-In this document we examine the most frequently used handler, `IMuModule`, which allows you to find and retrieve records from a single EMu module.
+In this document we examine the most frequently used handler, `Module`, which allows you to find and retrieve records from a single EMu module.
 
 # 3) Accessing an EMu Module
 
@@ -261,7 +261,7 @@ Dim parties = New IMu.Module("eparties", session)
 >
 > The IMu class name `Module` conflicts with a Visual Basic reserved word and it is therefore necessary to use the fully qualified name `IMu.Module`.
 
-This code assumes that a `Session` object called *session* has already been created. If a IMuSession object is not passed to the `Module` constructor, a session will be created automatically using the `DefaultHost` and `DefaultPort` class properties. See [Connecting to an IMu server](#2\)-connecting-to-an-imu-server) for details.
+This code assumes that a `Session` object called *session* has already been created. If a Session object is not passed to the `Module` constructor, a session will be created automatically using the `DefaultHost` and `DefaultPort` class properties. See [Connecting to an IMu server](#2\)-connecting-to-an-imu-server) for details.
 
 Once a `Module` object has been created, it can be used to search the specified module and retrieve records.
 
@@ -466,7 +466,7 @@ There are several points to note:
     This specifies a search for records where either the first name contains “John” or the last name contains “Smith”.
 
 1. 
-    Combinations of `AND` and `OR` search terms can be created. The `addAnd` method adds a new set of `AND` terms to the original `Terms` object. Similarly the `AddOr` method adds a new set of `OR` terms. For example, to restrict the search for a first name of “John” and a last name of “Smith” to matching records inserted before April 4, 2011 or on May 1, 2011, specify:
+    Combinations of `AND` and `OR` search terms can be created. The `AddAnd` method adds a new set of `AND` terms to the original `Terms` object. Similarly the `AddOr` method adds a new set of `OR` terms. For example, to restrict the search for a first name of “John” and a last name of “Smith” to matching records inserted before April 4, 2011 or on May 1, 2011, specify:
 
     C#
     ```
@@ -691,7 +691,7 @@ This `Sort` method takes two arguments:
 
     > **NOTE:**
     >
-    > If a sort order (“+” or “-”) is not given, the sort order defaults to ascending.
+    > If a sort order (`+` or `-`) is not given, the sort order defaults to ascending.
 
 * **flags**
 
@@ -1576,7 +1576,7 @@ The `Module` class `AddFetchSet` method is used to register a set of columns. Th
 
     The set of columns to be associated with the *name* argument.
 
-The `Module` class `SAddFetchSets` method is similar except that multiple sets can be registered at one time.
+The `Module` class `AddFetchSets` method is similar except that multiple sets can be registered at one time.
 
 The results are returned as if you had supplied the columns directly to the `Fetch` method.
 
@@ -1769,7 +1769,7 @@ namespace a_simple_example
 }
 ```
 
-In this example the *name* parameter entered via the HTML search page is submitted to the PHP script. The script searches for parties records that have the entered value as a last name and display the parties first and last names in an HTML table.
+In this example the *name* parameter entered via the HTML search page is submitted to the .Net script. The script searches for parties records that have the entered value as a last name and display the parties first and last names in an HTML table.
 
 ## 3.4) Multimedia
 
@@ -2387,7 +2387,7 @@ The supported values for name are:
 
     Specifies that the multimedia file should be converted to the specified [format](GLOSSARY.md###-MIME-format). If the multimedia is not already in the required format it is reformatted on-the-fly.
 
-    The IMu server uses ImageMagick to process the image and the range of supported formats is very large. The complete list is available from: http://www.imagemagick.org/script/formats.phpicon-external-link. Any of the supported formats can be used as the value part of this modifier.
+    The IMu server uses ImageMagick to process the image and the range of supported formats is very large. The complete list is available from: http://www.imagemagick.org/script/formats.php. Any of the supported formats can be used as the value part of this modifier.
 
 * *resource*
 
@@ -3070,7 +3070,7 @@ Removed 1 record(s)
 
 # 7) Exceptions
 
-When an error occurs, the IMu PHP API throws an exception. The exception is an [IMuException](TODO-link-to-reference) object. This is a subclass of .Net's standard `ApplicationException` class.
+When an error occurs, the IMu .Net API throws an exception. The exception is an [IMuException](TODO-link-to-reference) object. This is a subclass of .Net's standard `ApplicationException` class.
 
 The `IMuException` class overrides the `Exception` classes `ToString` method and returns an error message.
 
