@@ -2638,7 +2638,7 @@ By default the IMu server destroys all server-side objects when a session finish
 C#
 ```
 Module module = new Module("eparties", session);
-module.SetDestroy(false);
+module.Destroy = false;
 int[] keys = { 1, 2, 3, 4, 5, 42 };
 module.FindKeys(keys);
 ```
@@ -2660,7 +2660,7 @@ C#
 ```
 Session session = new Session("server.com", 12345);
 Module module = new Module("eparties", session);
-session.SetSuspend(true);
+session.Suspend = true;
 module.FindKeys(keys);
 ```
 
@@ -2673,7 +2673,7 @@ The server handles a request to suspend a connection by starting to listen for c
 
 C#
 ```
-session.SetSuspend(true);
+session.Suspend = true;
 module.FindKeys(keys);
 int reconnect = session.Port;
 ```
